@@ -102,6 +102,10 @@
                   export ANSIBLE_ROLES_PATH=$HOME/.ansible/collections/ansible_collections/pbench/agent/roles:$ANSIBLE_ROLES_PATH; ansible-playbook -i /root/.config/Inventory/myhosts.inv /root/perf-dept/sysadmin/Ansible/pbench_agent_install.yml
           become_user: root
 
+        - name: Run pbench-register-tool-set
+          shell: |
+             sshpass -p 100yard- ssh -o "StrictHostKeyChecking=no" -l root {{ inventory_hostname }} 'pbench-register-tool-set --remote={{ inventory_hostname }}'
+
         - name: Clone {{ git_tgen_repo }} to Trafficgen server
           git:
             repo: "{{ git_tgen_repo }}"

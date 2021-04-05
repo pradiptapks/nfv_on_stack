@@ -37,3 +37,20 @@
         marker: "# {mark} ANSIBLE MANAGED BLOCK #"
         block: |
           {{ vlan_testpmd_script }}
+
+    - block:
+        - name: Create sample trafficgen script
+          file:
+            path: /root/tgen.sh
+            state: touch
+            owner: root
+            group: root
+            mode: 0755
+
+        - name: Update trafficgen userdefined parameter
+          blockinfile:
+            path: /root/tgen.sh
+            marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+            block: |
+              {{ tgen_script }}
+      when: inventory_hostname in groups['trafficgen']

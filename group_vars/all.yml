@@ -15,6 +15,7 @@ trafficgen_vm: "true"
 tgen_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=17 iommu=pt intel_iommu=on isolcpus=2-19 mitigations=off ipv6.disable=1'"
 tgen_isolated_cores: "2-19"
 tgen_tuned_profile: "cpu-partitioning"
+tgen_script: "pbench-trafficgen --traffic-generator=trex-txrx --devices=0000:00:05.0,0000:00:06.0 --samples=1 --max-loss-pct=0.002 --config=Test --frame-sizes=64 --num-flows=128 --traffic-directions=bidirectional --flow-mods=src-ip --one-shot --skip-git-pull --search-runtime=120 --validation-runtime=1200 --rate=100 --rate-unit=% -- --send-teaching-measurement --send-teaching-warmup --teaching-measurement-packet-type=generic --teaching-warmup-packet-type=generic --disable-flow-cache"
 
 ##Git Repos
 git_pbench_repo: "https://code.engineering.redhat.com/gerrit/perf-dept"

@@ -1,0 +1,25 @@
+---
+- hosts: all
+  remote_user: cloud-user
+  become: true
+  gather_facts: True
+  any_errors_fatal: yes
+
+  tasks:
+    - name: Kernel Boot tunning with ISOLCPUS and HUGEPAGES
+      shell: |
+         grubby --args {{ kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
+      register: testpmd_grub_update
+      when: ansible_os_family == "RedHat" and inventory_hostname in groups['testpmd']
+
+    - name: Kernel Boot tunning with ISOLCPUS and HUGEPAGES
+      shell: |
+         grubby --args {{ tgen_kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
+      register: trafficgen_grub_update
+      when: ansible_os_family == "RedHat" and inventory_hostname in groups['trafficgen']
+
+    - name: Reboot OS
+      reboot:
+        pre_reboot_delay: 60
+      when: testpmd_grub_update.changed or trafficgen_grub_update.changed
+

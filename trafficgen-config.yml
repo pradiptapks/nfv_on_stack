@@ -1,0 +1,116 @@
+---
+- hosts: all
+  remote_user: cloud-user
+  become: true
+  gather_facts: True
+  any_errors_fatal: yes
+
+  tasks:
+    - block:
+        - name: Install ansible packages
+          dnf:
+            name:
+              - ansible
+
+        - name: Clone the {{ git_pbench_repo }} to Trafficgen server
+          git:
+            repo: "{{ git_pbench_repo }}"
+            dest: /root/perf-dept
+          become_user: root
+          environment:
+             GIT_SSL_NO_VERIFY: 'true'
+
+        - name: Create Pbench Inventory Directory
+          file:
+            path: "/root/.config/Inventory/"
+            state: directory
+          become_user: root
+          
+        - name: Create repo-bootstrap.hosts under Pbench Inventory
+          copy:
+            dest: "/root/.config/Inventory/repo-bootstrap.hosts"
+            mode: 0755
+            content: |
+              [servers]
+              {{ inventory_hostname }}
+          become_user: root
+
+        - name: Create repo-bootstrap.hosts under Pbench Inventory
+          copy:
+            dest: "/root/.config/Inventory/myhosts.inv"
+            mode: 0755
+            content: |
+              [servers]
+              {{ inventory_hostname }}
+              # DO NOT CHANGE ANYTHING BELOW THIS LINE
+              [servers:vars]
+              pbench_repo_url_prefix = https://copr-be.cloud.fedoraproject.org/results/ndokos
+
+              # where to get the key
+              pbench_key_url = http://git.app.eng.bos.redhat.com/git/pbench.git/plain/agent/production/ssh
+
+              # where to get the config file
+              pbench_config_url = http://git.app.eng.bos.redhat.com/git/pbench.git/plain/agent/production/config
+          become_user: root
+
+        - name: Create pbench_agent_install.yml
+          copy:
+            dest: "/root/perf-dept/sysadmin/Ansible/pbench_agent_install.yml"
+            mode: 0755
+            content: |
+              ---
+              - name: install pbench-agent
+                hosts: servers
+                become: yes
+                become_user: root
+
+                # The default value ('production') can be overriddent by cenv, a host-specific
+                # inventory variable.
+                vars:
+                   pbench_configuration_environment: "{{ cenv | default('production') }}"
+
+                roles:
+                   - pbench_repo_install
+                   - pbench_agent_install
+                   - pbench_agent_config
+
+        - name: Install ansible galaxy for pbench.agent
+          shell: |
+             ansible-galaxy collection install pbench.agent
+          become_user: root
+          
+        - name: Generate /etc/ssh/ RSA host key
+          shell: |
+             echo "y" | ssh-keygen -t rsa -N "" -C "" -f /root/.ssh/id_rsa
+        
+        - name: Create Copy of RHEL8.4 Repo
+          shell: |
+             cp -R /root/perf-dept/sysadmin/Ansible/roles/rhel8-repo-install/files/etc/yum.repos.d/8.3 /root/perf-dept/sysadmin/Ansible/roles/rhel8-repo-install/files/etc/yum.repos.d/8.4
+
+        - name: Copy SSH-KEY
+          shell: |
+             sshpass -p 100yard- ssh-copy-id -o "StrictHostKeyChecking=no" root@{{ inventory_hostname }};
+          become_user: root
+        
+        - name: Execute Pbench Boot strap
+          shell: |
+             ansible-playbook --user=root -i /root/.config/Inventory/repo-bootstrap.hosts /root/perf-dept/sysadmin/Ansible/repo-bootstrap.yml
+          become_user: root
+        
+        - name: Execute Pbench Agent
+          shell: |
+                  export ANSIBLE_ROLES_PATH=$HOME/.ansible/collections/ansible_collections/pbench/agent/roles:$ANSIBLE_ROLES_PATH; ansible-playbook -i /root/.config/Inventory/myhosts.inv /root/perf-dept/sysadmin/Ansible/pbench_agent_install.yml
+          become_user: root
+
+        - name: Clone {{ git_tgen_repo }} to Trafficgen server
+          git:
+            repo: "{{ git_tgen_repo }}"
+            dest: /opt/trafficgen
+          become_user: root
+      
+        - name: Installed Trex on Trafficgen server
+          shell: |
+             /opt/trafficgen/install-trex.sh --insecure
+          become_user: root
+      
+      when: trafficgen_vm == "true" and inventory_hostname in groups['trafficgen']

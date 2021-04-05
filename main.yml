@@ -1,0 +1,19 @@
+---
+- import_playbook: ./boot-strap.yml
+  tags:
+    - bootstrap
+- import_playbook: ./ssh_root.yml
+  tags:
+    - ssh
+- import_playbook: ./tuned.yml
+  tags:
+    - tuned
+- import_playbook: ./grub.yml
+  tags:
+    - grub
+- import_playbook: ./trafficgen-config.yml
+  tags:
+    - trafficgen
+- import_playbook: ./workload-config.yml
+  tags:
+    - workload

@@ -1,0 +1,39 @@
+---
+- hosts: all
+  remote_user: cloud-user
+  become: true
+  gather_facts: True
+  any_errors_fatal: yes
+  environment:
+     GIT_SSL_NO_VERIFY: 'true'
+
+  tasks:
+    - name: Configured TestPMD Script for Geneve Network
+      file: 
+        path: /root/geneve-testpmd.sh
+        state: touch
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Configured TestPMD Script for VLAN Network
+      file: 
+        path: /root/vlan-testpmd.sh
+        state: touch
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Update /root/geneve-testpmd.sh
+      blockinfile:
+        path: /root/geneve-testpmd.sh
+        marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+        block: |
+          {{ geneve_testpmd_script }}
+
+    - name: Update /root/vlan-testpmd.sh
+      blockinfile:
+        path: /root/vlan-testpmd.sh
+        marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+        block: |
+          {{ vlan_testpmd_script }}

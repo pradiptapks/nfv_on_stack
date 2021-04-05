@@ -1,0 +1,27 @@
+---
+
+## Host Configuration
+osp_release: "16.2"
+rhel_release: "8.4"
+
+## TestPMD VM Configuration
+kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=2-3 mitigations=off ipv6.disable=1'"
+isolated_cores: "2-3"
+tuned_profile: "cpu-partitioning"
+
+## Trafficgen VM Configuration
+pbench_repo: "true"
+trafficgen_vm: "true"
+tgen_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=17 iommu=pt intel_iommu=on isolcpus=2-19 mitigations=off ipv6.disable=1'"
+tgen_isolated_cores: "2-19"
+tgen_tuned_profile: "cpu-partitioning"
+
+##Git Repos
+git_pbench_repo: "https://code.engineering.redhat.com/gerrit/perf-dept"
+git_tgen_repo: "https://github.com/atheurer/trafficgen.git"
+
+## TestPMD Script
+geneve_testpmd_script: "testpmd -l 1,2,3 -n 4 --huge-dir=/dev/hugepages -w 0000:00:05.0 -w 0000:00:06.0 --socket-mem 2048,0 -- --nb-cores=2 --forward-mode=io --rxd=1024 --txd=1024 --rxq=1 --txq=1 --burst=64 --mbcache=512 -a --rss-udp --disable-crc-strip --stats-period 1"
+
+vlan_testpmd_script: "testpmd -l 1,2,3 -n 4 --huge-dir=/dev/hugepages -w 0000:00:07.0 -w 0000:00:08.0 --socket-mem 2048,0 -- --nb-cores=2 --forward-mode=io --rxd=1024 --txd=1024 --rxq=1 --txq=1 --burst=64 --mbcache=512 -a --rss-udp --disable-crc-strip --stats-period 1"
+

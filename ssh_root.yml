@@ -1,0 +1,21 @@
+---
+- hosts: all
+  remote_user: cloud-user
+  become: true
+  gather_facts: True
+  any_errors_fatal: yes
+
+  tasks:
+    - name: Change the PasswordAuthentication to Yes.
+      lineinfile: dest=/etc/ssh/sshd_config regexp='^#?PasswordAuthentication' line='PasswordAuthentication yes'
+
+    - name: Change the PermitRootLogin to Yes.
+      lineinfile: dest=/etc/ssh/sshd_config regexp='^#?PermitRootLogin' line='PermitRootLogin yes'
+
+    - name: Restart SSHD services
+      systemd:
+        name: sshd
+        state: restarted
+
+    - name: "Change ROOT password"
+      raw: echo -e "100yard-\n100yard-" | passwd

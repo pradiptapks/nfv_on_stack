@@ -1,0 +1,53 @@
+- hosts: all
+  remote_user: cloud-user
+  become: true
+  gather_facts: True
+#  debugger: on_skipped
+#  any_errors_fatal: yes
+
+  tasks:
+    - block:
+        - name: Install Pre-requisite packages
+          dnf:
+            name:
+              - tuned
+              - tuned-profiles-cpu-partitioning
+        - name: Update /etc/tuned/cpu-partitioning-variables.conf
+          blockinfile:
+            path: /etc/tuned/cpu-partitioning-variables.conf
+            marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+            block: |
+              isolated_cores={{ isolated_cores }}
+              no_balance_cores={{ isolated_cores }}
+        - name: Enable {{ tuned_profile }} profile
+          shell: |
+             tuned-adm profile {{ tuned_profile }}
+        - name: Updating initramfs/initrd image
+          shell: |
+             dracut -f
+      when: tuned_profile == "cpu-partitioning" and inventory_hostname in groups['testpmd']
+
+    - block:
+        - name: Install Pre-requisite packages
+          dnf:
+            name:
+              - tuned
+              - tuned-profiles-cpu-partitioning
+
+        - name: Update /etc/tuned/cpu-partitioning-variables.conf
+          blockinfile:
+            path: /etc/tuned/cpu-partitioning-variables.conf
+            marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+            block: |
+              isolated_cores={{ tgen_isolated_cores }}
+              no_balance_cores={{ tgen_isolated_cores }}
+
+        - name: Enable {{ tgen_tuned_profile }} profile
+          shell: |
+             tuned-adm profile {{ tgen_tuned_profile }}
+
+        - name: Updating initramfs/initrd image
+          shell: |
+             dracut -f
+      when: inventory_hostname in groups['trafficgen']
+

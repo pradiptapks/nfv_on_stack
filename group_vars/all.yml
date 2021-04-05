@@ -3,6 +3,7 @@
 ## Host Configuration
 osp_release: "16.2"
 rhel_release: "8.4"
+root_password: "100yard-"
 
 ## TestPMD VM Configuration
 kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=2-3 mitigations=off ipv6.disable=1'"

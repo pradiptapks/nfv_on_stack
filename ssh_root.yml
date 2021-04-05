@@ -18,4 +18,4 @@
         state: restarted
 
     - name: "Change ROOT password"
-      raw: echo -e "100yard-\n100yard-" | passwd
+      raw: echo -e "{{ root_password }}\n{{ root_password }}" | passwd

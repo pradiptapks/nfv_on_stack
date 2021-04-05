@@ -2,6 +2,9 @@
 - import_playbook: ./boot-strap.yml
   tags:
     - bootstrap
+- import_playbook: ./opttional_tasks/dpdk19.yml
+  tags:
+    - dpdk19
 - import_playbook: ./ssh_root.yml
   tags:
     - ssh

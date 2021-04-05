@@ -89,7 +89,7 @@
 
         - name: Copy SSH-KEY
           shell: |
-             sshpass -p 100yard- ssh-copy-id -o "StrictHostKeyChecking=no" root@{{ inventory_hostname }};
+             sshpass -p {{ root_password }} ssh-copy-id -o "StrictHostKeyChecking=no" root@{{ inventory_hostname }};
           become_user: root
         
         - name: Execute Pbench Boot strap
@@ -104,7 +104,7 @@
 
         - name: Run pbench-register-tool-set
           shell: |
-             sshpass -p 100yard- ssh -o "StrictHostKeyChecking=no" -l root {{ inventory_hostname }} 'pbench-register-tool-set --remote={{ inventory_hostname }}'
+             sshpass -p {{ root_password }} ssh -o "StrictHostKeyChecking=no" -l root {{ inventory_hostname }} 'pbench-register-tool-set --remote={{ inventory_hostname }}'
 
         - name: Clone {{ git_tgen_repo }} to Trafficgen server
           git:

@@ -53,4 +53,4 @@
             marker: "# {mark} ANSIBLE MANAGED BLOCK #"
             block: |
               {{ tgen_script }}
-      when: inventory_hostname in groups['trafficgen']
+      when: inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['trafficgen-bm']

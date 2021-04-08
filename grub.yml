@@ -1,25 +1,31 @@
 ---
 - hosts: all
-  remote_user: cloud-user
+  #remote_user: cloud-user
   become: true
   gather_facts: True
   any_errors_fatal: yes
 
   tasks:
-    - name: Kernel Boot tunning with ISOLCPUS and HUGEPAGES
+    - name: TestPMD Kernel Boot tunning with ISOLCPUS and HUGEPAGES
       shell: |
-         grubby --args {{ kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
+         grubby --remove-args={{ kernel_args }} --args {{ kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
       register: testpmd_grub_update
       when: ansible_os_family == "RedHat" and inventory_hostname in groups['testpmd']
 
-    - name: Kernel Boot tunning with ISOLCPUS and HUGEPAGES
+    - name: Trafficgen VM Kernel Boot tunning with ISOLCPUS and HUGEPAGES
       shell: |
-         grubby --args {{ tgen_kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
+         grubby --remove-args={{ tgen_kernel_args }} --args {{ tgen_kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
       register: trafficgen_grub_update
       when: ansible_os_family == "RedHat" and inventory_hostname in groups['trafficgen']
+
+    - name: Trafficgen BM Kernel Boot tunning with ISOLCPUS and HUGEPAGES
+      shell: |
+         grubby --remove-args={{ bm_kernel_args }} --args {{ bm_kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
+      register: bm_grub_update
+      when: ansible_os_family == "RedHat" and inventory_hostname in groups['trafficgen-bm']
 
     - name: Reboot OS
       reboot:
         pre_reboot_delay: 60
-      when: testpmd_grub_update.changed or trafficgen_grub_update.changed
+      when: testpmd_grub_update.changed or trafficgen_grub_update.changed or bm_grub_update.changed
 

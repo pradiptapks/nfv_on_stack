@@ -51,3 +51,27 @@
              dracut -f
       when: inventory_hostname in groups['trafficgen']
 
+    - block:
+        - name: Install Pre-requisite packages
+          dnf:
+            name:
+              - tuned
+              - tuned-profiles-cpu-partitioning
+
+        - name: Update /etc/tuned/cpu-partitioning-variables.conf
+          blockinfile:
+            path: /etc/tuned/cpu-partitioning-variables.conf
+            marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+            block: |
+              isolated_cores={{ bm_isolated_cores }}
+              no_balance_cores={{ bm_isolated_cores }}
+
+        - name: Enable {{ bm_tuned_profile }} profile
+          shell: |
+             tuned-adm profile {{ tgen_tuned_profile }}
+
+        - name: Updating initramfs/initrd image
+          shell: |
+             dracut -f
+      when: inventory_hostname in groups['trafficgen-bm']
+

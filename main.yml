@@ -2,21 +2,32 @@
 - import_playbook: ./boot-strap.yml
   tags:
     - bootstrap
+
 - import_playbook: ./opttional_tasks/dpdk19.yml
   tags:
     - dpdk19
 - import_playbook: ./ssh_root.yml
   tags:
     - ssh
+
 - import_playbook: ./tuned.yml
   tags:
     - tuned
+
 - import_playbook: ./grub.yml
   tags:
     - grub
+
 - import_playbook: ./trafficgen-config.yml
   tags:
-    - trafficgen
+    - trafficgen-vm
+  when: trafficgen_vm == "true"
+
+- import_playbook: ./trafficgen-bm-config.yml
+  tags:
+    - trafficgen-bm
+  when: trafficgen_bm == "true"
+
 - import_playbook: ./workload-config.yml
   tags:
     - workload

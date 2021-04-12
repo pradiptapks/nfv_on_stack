@@ -3,31 +3,28 @@
   tags:
     - bootstrap
 
-- import_playbook: ./opttional_tasks/dpdk19.yml
+- import_playbook: ./tasks/dpdk19.yml
   tags:
     - dpdk19
-- import_playbook: ./ssh_root.yml
+
+- import_playbook: ./tasks/ssh_root.yml
   tags:
     - ssh
 
-- import_playbook: ./tuned.yml
+- import_playbook: ./tasks/tuned.yml
   tags:
     - tuned
 
-- import_playbook: ./grub.yml
+- import_playbook: ./tasks/grub.yml
   tags:
     - grub
 
-- import_playbook: ./trafficgen-config.yml
+- import_playbook: ./tasks/trafficgen-config.yml
   tags:
-    - trafficgen-vm
-  when: trafficgen_vm == "true"
+    - trafficgen
+  when: trafficgen_vm == "true" or trafficgen_bm == "true"
 
-- import_playbook: ./trafficgen-bm-config.yml
+- import_playbook: ./tasks/testpmd-config.yml
   tags:
-    - trafficgen-bm
-  when: trafficgen_bm == "true"
-
-- import_playbook: ./workload-config.yml
-  tags:
-    - workload
+    - testpmd
+  when: testpmd_script == "True" and testpmd_profile is defined

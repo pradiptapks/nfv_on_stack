@@ -1,12 +1,10 @@
 ---
-
-## Host Configuration
+## ---------------------------------- RHOSP and RHEL Version ---------------------------------------------------------- ##
 osp_release: "16.2"
 rhel_release: "8.4"
 root_password: "100yard-"
 
-## -------------------------------------------------------------------------------------------- ##
-## Host Inventory Credentials
+## ----------------------------------- Inventory Credentials --------------------------------------------------------- ##
 testpmd_ssh_user: "cloud-user"
 testpmd_ssh_passwd: "null"
 testpmd_ssh_key: "/home/stack/key.pem"
@@ -18,14 +16,13 @@ trafficgen_ssh_key: "/home/stack/key.pem"
 BM_ssh_user: "root"
 BM_ssh_passwd: "100yard-"
 
-## -------------------------------------------------------------------------------------------- ##
+## ----------------------------------- TestPMD OS Configurations --------------------------------------------------------- ##
 ## TestPMD VM Configuration
 kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=2-3 mitigations=off ipv6.disable=1'"
 isolated_cores: "2-3"
 tuned_profile: "cpu-partitioning"
 
-## -------------------------------------------------------------------------------------------- ##
-## Trafficgen Configuration
+## -------------------------------------- Trafficgen OS Configuration------------------------------------------------------ ##
 #Vitual Machine
 pbench_repo: "true"
 trafficgen_vm: "true"
@@ -34,23 +31,25 @@ tgen_isolated_cores: "2-19"
 tgen_tuned_profile: "cpu-partitioning"
 
 #Physical Machine
-trafficgen_bm: "true"
-bm_isolated_cores: "8-63"
+trafficgen_bm: "false"
+bm_isolated_cores: "4-30,36-62"
 bm_tuned_profile: "cpu-partitioning"
-bm_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=300 iommu=pt intel_iommu=on isolcpus=8-63 mitigations=off ipv6.disable=1'"
+bm_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=150 iommu=pt intel_iommu=on isolcpus=4-30,36-62 mitigations=off ipv6.disable=1'"
 
-## -------------------------------------------------------------------------------------------- ##
+## --------------------------------------- Build Trafficgen Profile ----------------------------------------------------- ##
+trafficgen_backend: "trex-txrx"
+custom_profile: "../scripts/profile.json"
 
-tgen_script: "pbench-trafficgen --traffic-generator=trex-txrx --devices=0000:00:05.0,0000:00:06.0 --samples=1 --max-loss-pct=0.002 --config=Test --frame-sizes=64 --num-flows=128 --traffic-directions=bidirectional --flow-mods=src-ip --one-shot --skip-git-pull --search-runtime=120 --validation-runtime=1200 --rate=100 --rate-unit=% -- --send-teaching-measurement --send-teaching-warmup --teaching-measurement-packet-type=generic --teaching-warmup-packet-type=generic --disable-flow-cache"
+trex_txrx_profile_script: "pbench-trafficgen --traffic-generator=trex-txrx-profile --devices=0000:00:05.0,0000:00:06.0 --traffic-profile=/opt/trafficgen/trex-profiles/test/test-profile-01.json --rate=50 --rate-unit=% --samples=1 --max-loss-pct=0.002 --config=Test --tool-period=binary-search --skip-git-pull --search-runtime=60 --validation-runtime=120 -- --disable-flow-cache --measure-latency 0 --no-promisc --loss-granularity=segment"
 
-## -------------------------------------------------------------------------------------------- ##
-##Git Repos
+trex_txrx_script: "pbench-trafficgen --traffic-generator=trex-txrx --devices=0000:00:05.0,0000:00:06.0 --samples=1 --max-loss-pct=0.002 --config=Test --frame-sizes=64 --num-flows=128 --traffic-directions=bidirectional --flow-mods=src-ip --tool-period=binary-search --skip-git-pull --search-runtime=120 --validation-runtime=1200 --rate=100 --rate-unit=% -- --send-teaching-measurement --send-teaching-warmup --teaching-measurement-packet-type=generic --teaching-warmup-packet-type=generic --disable-flow-cache"
+
+## ---------------------------------------- Pbench & Trafficgen Configuration ---------------------------------------------------- ##
 git_pbench_repo: "https://code.engineering.redhat.com/gerrit/perf-dept"
 git_tgen_repo: "https://github.com/atheurer/trafficgen.git"
 
-## -------------------------------------------------------------------------------------------- ##
-## TestPMD Script
-geneve_testpmd_script: "testpmd -l 1,2,3 -n 4 --huge-dir=/dev/hugepages -w 0000:00:05.0 -w 0000:00:06.0 --socket-mem 2048,0 -- --nb-cores=2 --forward-mode=io --rxd=1024 --txd=1024 --rxq=1 --txq=1 --burst=64 --mbcache=512 -a --rss-udp --disable-crc-strip --stats-period 1"
+## --------------------------------------- Build TestPMD Script ----------------------------------------------------- ##
+testpmd_script: "True"
+testpmd_profile: "testpmd -l 1,2,3 -n 4 --huge-dir=/dev/hugepages -w 0000:00:05.0 -w 0000:00:06.0 --socket-mem 2048,0 -- --nb-cores=2 --forward-mode=io --rxd=1024 --txd=1024 --rxq=1 --txq=1 --burst=64 --mbcache=512 -a --rss-udp --disable-crc-strip --stats-period 1"
 
-vlan_testpmd_script: "testpmd -l 1,2,3 -n 4 --huge-dir=/dev/hugepages -w 0000:00:07.0 -w 0000:00:08.0 --socket-mem 2048,0 -- --nb-cores=2 --forward-mode=io --rxd=1024 --txd=1024 --rxq=1 --txq=1 --burst=64 --mbcache=512 -a --rss-udp --disable-crc-strip --stats-period 1"
 

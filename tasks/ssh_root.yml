@@ -1,6 +1,5 @@
 ---
 - hosts: all
-  #remote_user: cloud-user
   become: true
   gather_facts: True
   any_errors_fatal: yes

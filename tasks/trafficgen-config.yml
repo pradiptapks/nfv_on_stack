@@ -1,6 +1,5 @@
 ---
-- hosts: all
-  #remote_user: cloud-user
+- hosts: trafficgen-vm,trafficgen-bm
   become: true
   gather_facts: True
   any_errors_fatal: yes
@@ -33,7 +32,7 @@
             mode: 0755
             content: |
               [servers]
-              {{ inventory_hostname }}
+              localhost
           become_user: root
 
         - name: Create repo-bootstrap.hosts under Pbench Inventory
@@ -42,7 +41,7 @@
             mode: 0755
             content: |
               [servers]
-              {{ inventory_hostname }}
+              localhost
               # DO NOT CHANGE ANYTHING BELOW THIS LINE
               [servers:vars]
               pbench_repo_url_prefix = https://copr-be.cloud.fedoraproject.org/results/ndokos
@@ -89,14 +88,14 @@
              cp -R /root/perf-dept/sysadmin/Ansible/roles/rhel8-repo-install/files/etc/yum.repos.d/8.3 /root/perf-dept/sysadmin/Ansible/roles/rhel8-repo-install/files/etc/yum.repos.d/8.4
           when: rhel_release == "8.4"
 
-        - name: Create Copy of RHEL8.5 Repo
+        - name: Create Copy of RHEL8.4 Repo
           shell: |
              cp -R /root/perf-dept/sysadmin/Ansible/roles/rhel8-repo-install/files/etc/yum.repos.d/8.3 /root/perf-dept/sysadmin/Ansible/roles/rhel8-repo-install/files/etc/yum.repos.d/8.5
           when: rhel_release == "8.4"
 
         - name: Copy SSH-KEY
           shell: |
-             sshpass -p {{ root_password }} ssh-copy-id -o "StrictHostKeyChecking=no" root@{{ inventory_hostname }};
+             sshpass -p {{ root_password }} ssh-copy-id -o "StrictHostKeyChecking=no" root@localhost
           become_user: root
         
         - name: Execute Pbench Boot strap
@@ -106,12 +105,12 @@
         
         - name: Execute Pbench Agent
           shell: |
-                  export ANSIBLE_ROLES_PATH=$HOME/.ansible/collections/ansible_collections/pbench/agent/roles:$ANSIBLE_ROLES_PATH; ansible-playbook -i /root/.config/Inventory/myhosts.inv /root/perf-dept/sysadmin/Ansible/pbench_agent_install.yml
+             export ANSIBLE_ROLES_PATH=$HOME/.ansible/collections/ansible_collections/pbench/agent/roles:$ANSIBLE_ROLES_PATH; ansible-playbook -i /root/.config/Inventory/myhosts.inv /root/perf-dept/sysadmin/Ansible/pbench_agent_install.yml
           become_user: root
 
         - name: Run pbench-register-tool-set
           shell: |
-             sshpass -p {{ root_password }} ssh -o "StrictHostKeyChecking=no" -l root {{ inventory_hostname }} 'pbench-register-tool-set --remote={{ inventory_hostname }}'
+             sshpass -p {{ root_password }} ssh -o "StrictHostKeyChecking=no" -l root localhost 'pbench-register-tool-set --remote=localhost'
 
         - name: Clone {{ git_tgen_repo }} to Trafficgen server
           git:
@@ -124,5 +123,12 @@
           shell: |
              /opt/trafficgen/install-trex.sh --insecure
           become_user: root
-      
-      when: inventory_hostname in groups['trafficgen-bm']
+      when: inventory_hostname in groups['trafficgen-vm'] or inventory_hostname in groups['trafficgen-bm']
+
+    - name: Configure trex-txrx script 
+      include_tasks: trex-txrx.yml
+      when: trafficgen_backend == "trex-txrx"
+
+    - name: Configure trex-txrx-profile script 
+      include_tasks: trex-txrx-profile.yml
+      when: trafficgen_backend == "trex-txrx-profile" or custom_profile is defined

@@ -1,22 +1,20 @@
 [testpmd]
-172.17.5.155
-172.17.5.137
+172.17.5.60
+172.17.5.216
 
-[trafficgen]
-172.17.5.34
+[trafficgen-vm]
+172.17.5.218
 
 [trafficgen-bm]
 10.1.37.33
-
 
 [testpmd:vars]
 ansible_ssh_user={{ testpmd_ssh_user }}
 ansible_ssh_private_key_file={{ testpmd_ssh_key }}
 
-[trafficgen:vars]
+[trafficgen-vm:vars]
 ansible_ssh_user={{ trafficgen_ssh_user }}
 ansible_ssh_private_key_file={{ trafficgen_ssh_key }}
-
 
 [trafficgen-bm:vars]
 ansible_ssh_user={{ BM_ssh_user }}

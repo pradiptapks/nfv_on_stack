@@ -1,9 +1,6 @@
 - hosts: all
-  remote_user: cloud-user
   become: true
   gather_facts: True
-#  debugger: on_skipped
-#  any_errors_fatal: yes
 
   tasks:
     - block:
@@ -49,7 +46,7 @@
         - name: Updating initramfs/initrd image
           shell: |
              dracut -f
-      when: inventory_hostname in groups['trafficgen']
+      when: inventory_hostname in groups['trafficgen-vm']
 
     - block:
         - name: Install Pre-requisite packages

@@ -1,0 +1,16 @@
+---
+- hosts: testpmd
+  become: true
+  gather_facts: True
+  any_errors_fatal: yes
+  tasks:
+    - block:
+        - name: Configured TestPMD Script for Geneve Network
+          copy:
+            dest: /root/testpmd.sh
+            owner: root
+            group: root
+            mode: 0755
+            content: |
+              {{ testpmd_profile }}
+      when: inventory_hostname in groups['testpmd']

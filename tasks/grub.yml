@@ -1,6 +1,5 @@
 ---
 - hosts: all
-  #remote_user: cloud-user
   become: true
   gather_facts: True
   any_errors_fatal: yes
@@ -16,9 +15,9 @@
       shell: |
          grubby --remove-args={{ tgen_kernel_args }} --args {{ tgen_kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
       register: trafficgen_grub_update
-      when: ansible_os_family == "RedHat" and inventory_hostname in groups['trafficgen']
+      when: ansible_os_family == "RedHat" and inventory_hostname in groups['trafficgen-vm']
 
-    - name: Trafficgen BM Kernel Boot tunning with ISOLCPUS and HUGEPAGES
+    - name: Update Kernel boot parameters of Baremetal trafficgen
       shell: |
          grubby --remove-args={{ bm_kernel_args }} --args {{ bm_kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
       register: bm_grub_update

@@ -3,10 +3,6 @@
   tags:
     - bootstrap
 
-- import_playbook: ./tasks/dpdk19.yml
-  tags:
-    - dpdk19
-
 - import_playbook: ./tasks/ssh_root.yml
   tags:
     - ssh

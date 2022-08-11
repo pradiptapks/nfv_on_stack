@@ -20,7 +20,7 @@
 
     - name: Configure OSP {{ osp_release }}
       shell: |
-          rhos-release -x; rhos-release {{ osp_release }} -p passed_phase2 -r {{ rhel_release }}
+          rhos-release -x; rhos-release {{ osp_release }} -p {{ puddle }} -r {{ rhel_release }}
 
     - name: Enable Virt and Container-tool modules for {{ rhel_release }}
       shell: |
@@ -45,9 +45,10 @@
         pre_reboot_delay: 60
       when: osupdated.changed
 
-    - name: Install DPDK Pre-requisite packages
+    - name: Install packages for FDP test
       dnf:
         name:
+          - podman
           - gcc
           - make
           - cmake

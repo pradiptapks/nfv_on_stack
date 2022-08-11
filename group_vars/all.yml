@@ -1,7 +1,8 @@
 ---
 ## ---------------------------------- RHOSP and RHEL Version ---------------------------------------------------------- ##
-osp_release: "16.2"
-rhel_release: "8.4"
+osp_release: "17.0"
+rhel_release: "9.0"
+puddle: "passed_phase2"
 root_password: "100yard-"
 
 ## ----------------------------------- Inventory Credentials --------------------------------------------------------- ##
@@ -18,8 +19,8 @@ BM_ssh_passwd: "100yard-"
 
 ## ----------------------------------- TestPMD OS Configurations --------------------------------------------------------- ##
 ## TestPMD VM Configuration
-kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=2-3 mitigations=off ipv6.disable=1'"
-isolated_cores: "2-3"
+kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=3-6 mitigations=off ipv6.disable=1'"
+isolated_cores: "3-6"
 tuned_profile: "cpu-partitioning"
 
 ## -------------------------------------- Trafficgen OS Configuration------------------------------------------------------ ##
@@ -50,6 +51,6 @@ git_tgen_repo: "https://github.com/atheurer/trafficgen.git"
 
 ## --------------------------------------- Build TestPMD Script ----------------------------------------------------- ##
 testpmd_script: "True"
-testpmd_profile: "testpmd -l 1,2,3 -n 4 --huge-dir=/dev/hugepages -w 0000:00:05.0 -w 0000:00:06.0 --socket-mem 2048,0 -- --nb-cores=2 --forward-mode=io --rxd=1024 --txd=1024 --rxq=1 --txq=1 --burst=64 --mbcache=512 -a --rss-udp --disable-crc-strip --stats-period 1"
+testpmd_profile: "dpdk-testpmd -l 3,4,5 -n 4 --huge-dir=/dev/hugepages -w 0000:00:05.0 -w 0000:00:06.0 --socket-mem 2048,0 -- --nb-cores=2 --forward-mode=io --rxd=1024 --txd=1024 --rxq=1 --txq=1 --burst=64 --mbcache=512 -a --rss-udp --disable-crc-strip --stats-period 1"
 
 

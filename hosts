@@ -1,12 +1,9 @@
 [testpmd]
-172.17.5.60
-172.17.5.216
+192.168.0.100
 
 [trafficgen-vm]
-172.17.5.218
 
 [trafficgen-bm]
-10.1.37.33
 
 [testpmd:vars]
 ansible_ssh_user={{ testpmd_ssh_user }}

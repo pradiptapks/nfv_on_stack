@@ -2,7 +2,7 @@
 ## ---------------------------------- RHOSP and RHEL Version ---------------------------------------------------------- ##
 osp_release: "17.0"
 rhel_release: "9.0"
-puddle: "passed_phase2"
+puddle: "RHOS-17.0-RHEL-9-20220729.n.2"
 root_password: "100yard-"
 
 ## ----------------------------------- Inventory Credentials --------------------------------------------------------- ##
@@ -19,8 +19,8 @@ BM_ssh_passwd: "100yard-"
 
 ## ----------------------------------- TestPMD OS Configurations --------------------------------------------------------- ##
 ## TestPMD VM Configuration
-kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=3-6 mitigations=off ipv6.disable=1'"
-isolated_cores: "3-6"
+kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=3-5 mitigations=off ipv6.disable=1'"
+isolated_cores: "3-5"
 tuned_profile: "cpu-partitioning"
 
 ## -------------------------------------- Trafficgen OS Configuration------------------------------------------------------ ##

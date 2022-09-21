@@ -5,9 +5,6 @@
 [trafficgen-vm]
 
 [trafficgen-bm]
-perf162.perf.lab.eng.bos.redhat.com
-perf202.perf.lab.eng.bos.redhat.com
-perf122.perf.lab.eng.bos.redhat.com
 
 [testpmd:vars]
 ansible_ssh_user={{ testpmd_ssh_user }}

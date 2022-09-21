@@ -1,10 +1,13 @@
 [testpmd]
-192.168.0.102
-192.168.0.103
+192.168.0.100
+192.168.0.101
 
 [trafficgen-vm]
 
 [trafficgen-bm]
+perf162.perf.lab.eng.bos.redhat.com
+perf202.perf.lab.eng.bos.redhat.com
+perf122.perf.lab.eng.bos.redhat.com
 
 [testpmd:vars]
 ansible_ssh_user={{ testpmd_ssh_user }}

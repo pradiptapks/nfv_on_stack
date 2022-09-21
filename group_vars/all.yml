@@ -2,7 +2,7 @@
 ## ---------------------------------- RHOSP and RHEL Version ---------------------------------------------------------- ##
 osp_release: "17.0"
 rhel_release: "9.0"
-puddle: "RHOS-17.0-RHEL-9-20220729.n.2"
+puddle: "RHOS-17.0-RHEL-9-20220830.n.1"
 root_password: "100yard-"
 
 ## ----------------------------------- Inventory Credentials --------------------------------------------------------- ##
@@ -17,25 +17,26 @@ trafficgen_ssh_key: "/home/stack/key.pem"
 BM_ssh_user: "root"
 BM_ssh_passwd: "100yard-"
 
+pbench_repo: "false"
+
 ## ----------------------------------- TestPMD OS Configurations --------------------------------------------------------- ##
 ## TestPMD VM Configuration
-kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=3-5 mitigations=off ipv6.disable=1'"
+kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=4 iommu=pt intel_iommu=on isolcpus=3-5'"
 isolated_cores: "3-5"
 tuned_profile: "cpu-partitioning"
 
 ## -------------------------------------- Trafficgen OS Configuration------------------------------------------------------ ##
 #Vitual Machine
-pbench_repo: "true"
-trafficgen_vm: "true"
-tgen_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=17 iommu=pt intel_iommu=on isolcpus=2-19 mitigations=off ipv6.disable=1'"
+trafficgen_vm: "false"
+tgen_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=17 iommu=pt intel_iommu=on isolcpus=2-19'"
 tgen_isolated_cores: "2-19"
 tgen_tuned_profile: "cpu-partitioning"
 
 #Physical Machine
 trafficgen_bm: "false"
-bm_isolated_cores: "4-30,36-62"
+bm_isolated_cores: "6-35,42-71"
 bm_tuned_profile: "cpu-partitioning"
-bm_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=150 iommu=pt intel_iommu=on isolcpus=4-30,36-62 mitigations=off ipv6.disable=1'"
+bm_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=150 iommu=pt intel_iommu=on isolcpus=6-35,42-71'"
 
 ## --------------------------------------- Build Trafficgen Profile ----------------------------------------------------- ##
 trafficgen_backend: "trex-txrx"

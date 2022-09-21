@@ -39,11 +39,15 @@
         update_cache: yes
       when: ansible_os_family == "RedHat"
       register: osupdated
+      tags:
+        - update
 
     - name: Reboot OS
       reboot:
         pre_reboot_delay: 60
       when: osupdated.changed
+      tags:
+        - reboot
 
     - name: Install packages for FDP test
       dnf:

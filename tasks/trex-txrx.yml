@@ -1,9 +1,0 @@
----
-- name: Configured Trafficgen script with trex-txrx backend
-  copy:
-    dest: /root/trex-txrx.sh
-    owner: root
-    group: root
-    mode: 0755
-    content: |
-      {{ trex_txrx_script }}

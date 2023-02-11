@@ -1,0 +1,155 @@
+heat_template_version: rocky
+
+description: Template to create VNFs on OpenStack NFVi Cluster
+
+parameters:
+  vnf_az:
+    type: string
+    description: Name of availability zone for VNF
+    default: nova
+  image_name:
+    type: string
+    description: Name of image to useto provision VNF
+    default: cirros
+  image_url:
+    type: string
+    description: Location of Image
+    default: http://download.cirros-cloud.net/0.6.0/cirros-0.6.0-x86_64-disk.img
+  provider_subnet1:
+    type: string
+    description: Provider Network 1 for VNF
+  provider_subnet2:
+    type: string
+    description: Provider Network 2 for VNF
+  management_subnet:
+    type: string
+    description: Management Network for VNF
+    default: management-subnet
+  vnf_flavor:
+    type: string
+    description: VNF Flavor
+    default: m1.large
+  vnf_scale_limit:
+    type: number
+    description: Number of VN need to provision
+    default: 1
+  srvgroup_name:
+    type: string
+    description: Nova affinity policies for VNF distribution
+    default: ServerGroup
+  vnf_disk_size:
+    type: number
+    description: Virtual Disk size(GB) of VNF
+    default: 1
+  vnf_ram_size:
+    type: number
+    description: Virtual RAM size(GB) of VNF
+    default: 1
+  vnf_cpu_count:
+    type: number
+    description: vCPUs for VNF
+    default: 2
+  root_password:
+    type: string
+    description: Root Password for the VNF
+    default: password
+
+resources:
+
+  srvimage:
+    type: OS::Glance::WebImage
+    description: VNF Image
+    properties:
+      name: { get_param: image_name }
+      disk_format: qcow2
+      container_format: bare
+      visibility: shared
+      protected: False
+      location: { get_param: image_url }
+
+  srvflavor:
+    type: OS::Nova::Flavor
+    description: VNF Flavor
+    properties:
+      name:
+        str_replace:
+          template: {list_join: ['-', [{get_param: 'OS::stack_name'}, 'flavor']]}
+          params:
+            ".": "-"
+      disk: {get_param: vnf_disk_size}
+      ram: {get_param: vnf_ram_size}
+      vcpus: {get_param: vnf_cpu_count}
+      extra_specs:
+              { "hw:numa_nodes": "2", "hw:cpu_policy": "dedicated", "hw:mem_page_size": "1GB", "hw:emulator_threads_policy": "isolate", "hw:isolated_metadata": "true", "hw:pmu": "false" }
+              #{ "hw:numa_nodes": "1", "hw:numa_cpus.0": "23,25,27,29,31,33", "hw:numa_mem.0": "10240", "hw:cpu_policy": "dedicated", "hw:mem_page_size": "1GB", "hw:emulator_threads_policy": "isolate", "hw:isolated_metadata": "true", "hw:pmu": "false" }
+
+  srvgroup: 
+    type: OS::Nova::ServerGroup 
+    properties: 
+      name:  { get_param: srvgroup_name }
+      policies: [ 'anti-affinity' ]
+
+  keypair:
+    type: OS::Nova::KeyPair
+    description: VNF-Key
+    properties:
+      save_private_key: true
+      name:
+        str_replace:
+          template: {list_join: ['-', [{get_param: 'OS::stack_name'}, 'keypair']]}
+          params:
+            ".": "-"
+  vnf:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: vnf_scale_limit }
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: { list_join: ['-', [{get_param: 'OS::stack_name'}, '%index%']] }
+          availability_zone: { get_param: vnf_az }
+          image: { get_resource: srvimage }
+          key_name: { get_resource: keypair }
+          flavor: { get_resource: srvflavor }
+          scheduler_hints:
+            group: { get_resource: srvgroup }
+          networks:
+            - subnet: { get_param: management_subnet }
+              port_extra_properties:
+                port_security_enabled: False
+                binding:vnic_type: direct
+                value_specs:
+                  { 'binding:profile': {'trusted':'true'} }
+            - subnet: { get_param: provider_subnet1 }
+              port_extra_properties:
+                port_security_enabled: False
+            - subnet: { get_param: provider_subnet2 }
+              port_extra_properties:
+                port_security_enabled: False
+#          user_data_format: RAW
+#          user_data:
+#            str_replace:
+#              template: |
+#                #cloud-config
+#                disable_root: False
+#                ssh_deletekeys: False
+#                ssh_pwauth: True
+#
+#                chpasswd:
+#                  list: |
+#                    root:$root_password
+#                  expire: False
+#
+#                runcmd:
+#                  - /usr/bin/systemctl restart sshd
+#              params:
+#                $root_password: { get_param: root_password }
+
+outputs:
+  vnf_management_port:
+    description: The Management IP address of VNFs
+    value: { get_attr: [ vnf, addresses, management, 0, port] }
+  private_key:
+    description: The SSH Private Key File for VNF
+    value: { get_attr: [keypair, private_key] }
+

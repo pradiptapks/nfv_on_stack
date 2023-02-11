@@ -1,0 +1,13 @@
+parameters:
+  root_password: 100yard-
+  image_name: rhel8.4
+  #image_url: https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-20220919.0.x86_64.qcow2
+  image_url: http://download.eng.pek2.redhat.com/released/RHEL-8/8.4.0/BaseOS/x86_64/images/rhel-guest-image-8.4-992.x86_64.qcow2
+  vnf_disk_size: 10
+  vnf_ram_size: 10240
+  vnf_cpu_count: 6
+  vnf_scale_limit: 2
+  vnf_az: nova
+  management_subnet: management-subnet
+  provider_subnet1: provider-subnet-1
+  provider_subnet2: provider-subnet-2

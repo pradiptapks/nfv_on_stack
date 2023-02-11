@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: testpmd,trafficgen
   become: true
   gather_facts: True
 
@@ -9,20 +9,28 @@
             name:
               - tuned
               - tuned-profiles-cpu-partitioning
+          when: testpmd_tuned_profile == "cpu-partitioning"
+
+        - name: Comment isolated_cores entry
+          lineinfile: dest=/etc/tuned/cpu-partitioning-variables.conf regexp='^isolated_cores' line='#isolated_cores=${f:calc_isolated_cores:1}'
+          when: testpmd_tuned_profile == "cpu-partitioning"
+
         - name: Update /etc/tuned/cpu-partitioning-variables.conf
           blockinfile:
             path: /etc/tuned/cpu-partitioning-variables.conf
             marker: "# {mark} ANSIBLE MANAGED BLOCK #"
             block: |
-              isolated_cores={{ isolated_cores }}
-              no_balance_cores={{ isolated_cores }}
-        - name: Enable {{ tuned_profile }} profile
+              isolated_cores={{ testpmd_isolated_cores }}
+              no_balance_cores={{ testpmd_isolated_cores }}
+          when: testpmd_tuned_profile == "cpu-partitioning"
+
+        - name: Enable {{ testpmd_tuned_profile }} profile
           shell: |
-             tuned-adm profile {{ tuned_profile }}
+             tuned-adm profile {{ testpmd_tuned_profile }}
         - name: Updating initramfs/initrd image
           shell: |
              dracut -f
-      when: tuned_profile == "cpu-partitioning" and inventory_hostname in groups['testpmd']
+      when: inventory_hostname in groups['testpmd']
 
     - block:
         - name: Install Pre-requisite packages
@@ -30,30 +38,11 @@
             name:
               - tuned
               - tuned-profiles-cpu-partitioning
+          when: tgen_tuned_profile == "cpu-partitioning"
 
-        - name: Update /etc/tuned/cpu-partitioning-variables.conf
-          blockinfile:
-            path: /etc/tuned/cpu-partitioning-variables.conf
-            marker: "# {mark} ANSIBLE MANAGED BLOCK #"
-            block: |
-              isolated_cores={{ tgen_isolated_cores }}
-              no_balance_cores={{ tgen_isolated_cores }}
-
-        - name: Enable {{ tgen_tuned_profile }} profile
-          shell: |
-             tuned-adm profile {{ tgen_tuned_profile }}
-
-        - name: Updating initramfs/initrd image
-          shell: |
-             dracut -f
-      when: inventory_hostname in groups['trafficgen-vm']
-
-    - block:
-        - name: Install Pre-requisite packages
-          dnf:
-            name:
-              - tuned
-              - tuned-profiles-cpu-partitioning
+        - name: Comment isolated_cores entry
+          lineinfile: dest=/etc/tuned/cpu-partitioning-variables.conf regexp='^isolated_cores' line='#isolated_cores=${f:calc_isolated_cores:1}'
+          when: tgen_tuned_profile == "cpu-partitioning"
 
         - name: Update /etc/tuned/cpu-partitioning-variables.conf
           blockinfile:
@@ -62,13 +51,14 @@
             block: |
               isolated_cores={{ bm_isolated_cores }}
               no_balance_cores={{ bm_isolated_cores }}
+          when: tgen_tuned_profile == "cpu-partitioning"
 
-        - name: Enable {{ bm_tuned_profile }} profile
+        - name: Enable {{ tgen_tuned_profile }} profile
           shell: |
              tuned-adm profile {{ tgen_tuned_profile }}
 
         - name: Updating initramfs/initrd image
           shell: |
              dracut -f
-      when: inventory_hostname in groups['trafficgen-bm']
+      when: tgen_kernel_args == "true" and inventory_hostname in groups['trafficgen']
 

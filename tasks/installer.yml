@@ -1,0 +1,72 @@
+---
+- hosts: all
+  become: true
+  gather_facts: True
+  any_errors_fatal: yes
+
+  tasks:
+    - name: Set timezone to UTC
+      timezone:
+        name: UTC
+
+    - block:
+        - name: Install rhos-release
+          shell: |
+             dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
+
+        - name: Configure RHOSP {{ osp_release }} repos in all hosts
+          shell: |
+             rhos-release -x; rhos-release {{ osp_release }} -p {{ puddle }} -r {{ rhel_release }}
+
+        - name: Enable Virt and Container-tool modules for {{ rhel_release }}
+          shell: |
+             dnf -y module disable virt:rhel container-tools:rhel8; dnf -y module enable virt:av container-tools:3.0
+          when: osp_release == "16.2" and rhel_release == "8.4"
+
+        - name: Enable Virt and Container-tool modules for {{ rhel_release }}
+          shell: |
+             dnf -y module disable virt:rhel container-tools:rhel8; dnf -y module enable virt:8.2 container-tools:2.0
+          when: osp_release == "16.1" and rhel_release == "8.2"
+
+      when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
+
+    - name: Update latest packages in RHEL VM
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+      when: inventory_hostname in groups['testpmd']
+      register: osupdated
+
+    - name: Post update VM reboot
+      reboot:
+        pre_reboot_delay: 60
+      when: osupdated.changed or inventory_hostname in groups['testpmd']
+
+    - name: Install FDP pre-requisites packages for RHEL VM and Trafficgen host
+      dnf:
+        name:
+          - podman
+          - gcc
+          - make
+          - cmake
+          - kernel-headers
+          - gcc-c++
+          - cmake
+          - glibc-devel
+          - glibc-headers
+          - kernel-devel
+          - git
+          - wget
+          - vim
+          - tcpdump
+          - cscope
+          - dpdk-tools
+          - tmux
+          - lsof
+          - tcl
+          - dpdk
+          - numactl-devel
+        state: present
+      when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
+

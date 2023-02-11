@@ -1,7 +1,7 @@
 ---
-- import_playbook: ./boot-strap.yml
+- import_playbook: ./tasks/installer.yml
   tags:
-    - bootstrap
+    - installer
 
 - import_playbook: ./tasks/ssh_root.yml
   tags:
@@ -17,10 +17,8 @@
 
 - import_playbook: ./tasks/trafficgen-config.yml
   tags:
-    - trafficgen
-  when: trafficgen_vm == "true" or trafficgen_bm == "true"
+    - bench-trafficgen
 
 - import_playbook: ./tasks/testpmd-config.yml
   tags:
-    - testpmd
-  when: testpmd_script == "True" and testpmd_profile is defined
+    - dpdk-testpmd

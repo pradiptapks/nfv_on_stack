@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: testpmd
   become: true
   gather_facts: True
   any_errors_fatal: yes

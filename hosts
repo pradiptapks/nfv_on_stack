@@ -1,19 +1,20 @@
 [testpmd]
-192.168.0.102
-192.168.0.103
+192.168.0.78
+192.168.0.214
 
-[trafficgen-vm]
+[trafficgen]
+perf122.perf.lab.eng.bos.redhat.com
 
-[trafficgen-bm]
+[osp-compute]
+perf196.perf.lab.eng.bos.redhat.com
+perf202.perf.lab.eng.bos.redhat.com
 
 [testpmd:vars]
 ansible_ssh_user={{ testpmd_ssh_user }}
 ansible_ssh_private_key_file={{ testpmd_ssh_key }}
 
-[trafficgen-vm:vars]
-ansible_ssh_user={{ trafficgen_ssh_user }}
-ansible_ssh_private_key_file={{ trafficgen_ssh_key }}
+[trafficgen:vars]
+ansible_ssh_user={{ ssh_user }}
 
-[trafficgen-bm:vars]
-ansible_ssh_user={{ BM_ssh_user }}
-#ansible_ssh_pass={{ BM_ssh_passwd }}
+[osp-compute:vars]
+ansible_ssh_user={{ ssh_user }}

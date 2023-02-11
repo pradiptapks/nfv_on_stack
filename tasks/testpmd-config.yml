@@ -1,16 +1,17 @@
 ---
 - hosts: testpmd
-  become: true
+  become: True
   gather_facts: True
   any_errors_fatal: yes
   tasks:
     - block:
-        - name: Configured TestPMD Script for Geneve Network
+        - name: Copied custom dpdk-testpmd script to VM
           copy:
-            dest: /root/testpmd.sh
+            src: "{{ testpmd_script_location }}"
+            dest: /root/dpdk_testpmd.sh
             owner: root
             group: root
             mode: 0755
-            content: |
-              {{ testpmd_profile }}
-      when: inventory_hostname in groups['testpmd']
+        - name: Execute dpdk-testpmd script
+          command: sh /root/dpdk_testpmd.sh
+      when: testpmd_custom_script == "true" and inventory_hostname in groups['testpmd']

@@ -30,7 +30,7 @@
 
       when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
 
-    - name: Update latest packages in TestPMD and DPDK hosts
+    - name: Update latest packages in Trafficgen and DPDK hosts
       dnf:
         name: "*"
         state: latest
@@ -43,7 +43,7 @@
         pre_reboot_delay: 60
       when: osupdated.changed and inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
 
-    - name: Install FDP pre-requisites packages for RHEL VM and Trafficgen host
+    - name: Install FDP pre-requisites packages for DPDK and Trafficgen host
       dnf:
         name:
           - podman

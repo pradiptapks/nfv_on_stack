@@ -60,5 +60,5 @@
         - name: Updating initramfs/initrd image
           shell: |
              dracut -f
-      when: tgen_kernel_args == "true" and inventory_hostname in groups['trafficgen']
+      when: tgen_kernel == "true" and inventory_hostname in groups['trafficgen']
 

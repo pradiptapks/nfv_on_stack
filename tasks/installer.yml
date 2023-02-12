@@ -30,18 +30,18 @@
 
       when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
 
-    - name: Update latest packages in RHEL VM
+    - name: Update latest packages in TestPMD and DPDK hosts
       dnf:
         name: "*"
         state: latest
         update_cache: yes
-      when: inventory_hostname in groups['testpmd']
+      when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
       register: osupdated
 
-    - name: Post update VM reboot
+    - name: Post update host reboot
       reboot:
         pre_reboot_delay: 60
-      when: osupdated.changed or inventory_hostname in groups['testpmd']
+      when: osupdated.changed and inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
 
     - name: Install FDP pre-requisites packages for RHEL VM and Trafficgen host
       dnf:

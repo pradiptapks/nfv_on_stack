@@ -28,7 +28,7 @@ testpmd_script_location: "scripts/dpdk-testpmd.sh"
 ################################
 #  Trafficgen OS Configuration #
 ################################
-tgen_kernel: "true"
+tgen_kernel: "false"
 tgen_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=100 iommu=pt intel_iommu=on isolcpus=8-55 vfio.enable_unsafe_noiommu_mode=Y'"
 tgen_isolated_cores: "8-55"
 tgen_tuned_profile: "cpu-partitioning"

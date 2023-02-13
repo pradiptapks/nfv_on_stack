@@ -22,3 +22,7 @@
 - import_playbook: ./tasks/testpmd-config.yml
   tags:
     - dpdk-testpmd
+
+- import_playbook: ./tasks/compute-config.yml
+  tags:
+    - osp-compute

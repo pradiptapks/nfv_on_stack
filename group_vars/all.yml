@@ -48,8 +48,9 @@ tgen_pci_list:
 ##############################
 #  Additional Configuration  #
 ##############################
+# Enabled OVS debug repository and installed required RPMs for debugging.
+# RPMs get install in all investory host and can modified as per user choice.
 fdp_debug: "true"
-
 package_list:
   - "podman"
   - "gcc"
@@ -73,9 +74,21 @@ package_list:
   - "dpdk"
   - "numactl-devel"
   - "openvswitch2.15-debuginfo-2.15.0-124.el8fdp.x86_64"
+  - "openvswitch2.15-debugsource-2.15.0-124.el8fdp.x86_64"
+  - "openvswitch2.15-test-0:2.15.0-124.el8fdp.noarch"
   - "binutils"
   - "perf"
 pip_binaries:
   - "text_histogram3"
+
+##################
+# OVS-DPDK Debug #
+##################
+# Due to pre-requsites of debug rpms, ensure "fdp_debug" params should be true before enabled ovs_dpdk_debug flag.
+ovs_dpdk_debug: "true"
+
+# For Perf samples analysis for PMD cores, this is sample script need to copied to Compute host.
+pmd_perf_script: "scripts/pmd_perf.sh"
+perf_git_script: "https://github.com/chaudron/perf_scripts"
 
 

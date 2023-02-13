@@ -1,0 +1,25 @@
+---
+- hosts: osp-compute
+  become: True
+  gather_facts: True
+  any_errors_fatal: yes
+  tasks:
+    - block:
+        - name: Copied Perf Script
+          copy:
+            src: "{{ pmd_perf_script }}"
+            dest: /root/pmd_perf.sh
+            owner: root
+            group: root
+            mode: 0755
+          when: pmd_perf_script is defined
+
+        - name: Clone Git repository of Perf Script
+          git:
+            repo: "{{ perf_git_script }}"
+            dest: /root/perf_script
+            version: master
+            clone: yes
+            update: yes
+          when: perf_git_script is defined
+      when: fdp_debug == "true" and ovs_dpdk_debug == "true" and inventory_hostname in groups['osp-compute']

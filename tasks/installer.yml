@@ -30,43 +30,55 @@
 
       when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
 
-    - name: Update latest packages in Trafficgen and DPDK hosts
-      dnf:
-        name: "*"
-        state: latest
-        update_cache: yes
-      when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
-      register: osupdated
+    - block:
+        - name: Update latest packages in Trafficgen and DPDK hosts
+          dnf:
+            name: "*"
+            state: latest
+            update_cache: yes
+          register: osupdated
+        - name: Post update host reboot
+          reboot:
+            pre_reboot_delay: 30
+          when: osupdated.changed
 
-    - name: Post update host reboot
-      reboot:
-        pre_reboot_delay: 60
-      when: osupdated.changed and inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
-
-    - name: Install FDP pre-requisites packages for DPDK and Trafficgen host
-      dnf:
-        name:
-          - podman
-          - gcc
-          - make
-          - cmake
-          - kernel-headers
-          - gcc-c++
-          - cmake
-          - glibc-devel
-          - glibc-headers
-          - kernel-devel
-          - git
-          - wget
-          - vim
-          - tcpdump
-          - cscope
-          - dpdk-tools
-          - tmux
-          - lsof
-          - tcl
-          - dpdk
-          - numactl-devel
-        state: present
       when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
 
+    - block:
+        - name: Update rhosp-rhel8-fdp-debug Repo
+          blockinfile:
+            path: /etc/yum.repos.d/rhos-release-rhel-{{ rhel_release }}.repo
+            marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+            block: |
+              [rhosp-rhel-{{ rhel_release }}-fdp-debug]
+              name=Red Hat Enterprise Linux Fast Datapath debug $releasever - $basearch
+              baseurl=http://rhsm-pulp.corp.redhat.com/content/dist/layered/rhel8/$basearch/fast-datapath/debug/
+              enabled=1
+              gpgcheck=0
+          when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+        - name: Update rhosp-rhel9-fdp-debug Repo
+          blockinfile:
+            path: /etc/yum.repos.d/rhos-release-rhel-{{ rhel_release }}.repo
+            marker: "# {mark} ANSIBLE MANAGED BLOCK #"
+            block: |
+              [rhosp-rhel-{{ rhel_release }}-fdp-debug]
+              name=Red Hat Enterprise Linux Fast Datapath debug $releasever - $basearch
+              baseurl=http://rhsm-pulp.corp.redhat.com/content/dist/layered/rhel9/$basearch/fast-datapath/debug/
+              enabled=1
+              gpgcheck=0
+          when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
+        - name: Install additional FDP packages for Debugging
+          loop: "{{ package_list }}"
+          dnf:
+            name: "{{ item }}"
+            state: present
+
+        - name: Install additional Python binaries
+          loop: "{{ pip_binaries }}"
+          pip:
+            name: "{{ item }}"
+            state: present
+
+      when: fdp_debug == "true"

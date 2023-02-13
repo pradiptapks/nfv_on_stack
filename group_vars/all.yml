@@ -45,3 +45,36 @@ tgen_pci_list:
   - "0000:81:00.0"
   - "0000:81:00.1"
 
+##############################
+#  Additional Configuration  #
+##############################
+fdp_debug: "true"
+
+package_list:
+  - "podman"
+  - "gcc"
+  - "make"
+  - "cmake"
+  - "kernel-headers"
+  - "gcc-c++"
+  - "cmake"
+  - "glibc-devel"
+  - "glibc-headers"
+  - "kernel-devel"
+  - "git"
+  - "wget"
+  - "vim"
+  - "tcpdump"
+  - "cscope"
+  - "dpdk-tools"
+  - "tmux"
+  - "lsof"
+  - "tcl"
+  - "dpdk"
+  - "numactl-devel"
+  - "openvswitch2.15-debuginfo-2.15.0-124.el8fdp.x86_64"
+  - "binutils"
+pip_binaries:
+  - "text_histogram3"
+
+

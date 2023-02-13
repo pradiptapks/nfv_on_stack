@@ -80,5 +80,6 @@
           pip:
             name: "{{ item }}"
             state: present
+          when: inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
 
       when: fdp_debug == "true"

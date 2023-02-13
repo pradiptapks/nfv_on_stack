@@ -74,6 +74,7 @@ package_list:
   - "numactl-devel"
   - "openvswitch2.15-debuginfo-2.15.0-124.el8fdp.x86_64"
   - "binutils"
+  - "perf"
 pip_binaries:
   - "text_histogram3"
 

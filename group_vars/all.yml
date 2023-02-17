@@ -4,7 +4,7 @@
 #####################
 osp_release: "16.2"
 rhel_release: "8.4"
-puddle: "RHOS-16.2-RHEL-8-20221111.n.1"
+puddle: "RHOS-16.2-RHEL-8-20230209.n.1"
 
 #####################
 #  Host Credentials #
@@ -52,32 +52,34 @@ tgen_pci_list:
 # RPMs get install in all investory host and can modified as per user choice.
 fdp_debug: "true"
 package_list:
+  - "strace"
+  - "wireshark-cli"
   - "podman"
-  - "gcc"
-  - "make"
-  - "cmake"
-  - "kernel-headers"
-  - "gcc-c++"
-  - "cmake"
-  - "glibc-devel"
-  - "glibc-headers"
-  - "kernel-devel"
   - "git"
   - "wget"
   - "vim"
   - "tcpdump"
-  - "cscope"
   - "dpdk-tools"
   - "tmux"
   - "lsof"
   - "tcl"
   - "dpdk"
   - "numactl-devel"
-  - "openvswitch2.15-debuginfo-2.15.0-124.el8fdp.x86_64"
-  - "openvswitch2.15-debugsource-2.15.0-124.el8fdp.x86_64"
-  - "openvswitch2.15-test-0:2.15.0-124.el8fdp.noarch"
   - "binutils"
-  - "perf"
+  - "openvswitch2.15-debuginfo-2.15.0-130.el8fdp.x86_64"
+  - "openvswitch2.15-debugsource-2.15.0-130.el8fdp.x86_64"
+  - "openvswitch2.15-test-0:2.15.0-130.el8fdp.noarch"
+  - "perf-4.18.0-305.76.1.el8_4.x86_64"
+#  - "gcc"
+#  - "make"
+#  - "cmake"
+#  - "kernel-headers"
+#  - "gcc-c++"
+#  - "cmake"
+#  - "glibc-devel"
+#  - "glibc-headers"
+#  - "kernel-devel"
+#  - "cscope"
 pip_binaries:
   - "text_histogram3"
 
@@ -92,3 +94,17 @@ pmd_perf_script: "scripts/pmd_perf.sh"
 perf_git_script: "https://github.com/chaudron/perf_scripts"
 
 
+#######################
+# Mellanox Nic Config #
+#######################
+mlnx_compute: "false"
+mlnx_ofed_repository: "false"
+# Update the OFED version as per the avaliable details: https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
+mlnx_ofed_version: "5.9-0.5.6.0"
+mlnx_package_list:
+  - "mft"
+mlnx_sriov_vf: "false"
+mlnx_vf_num: "20"
+mlnx_pci_list:
+  - "0000:98:00.0"
+  - "0000:98:00.1"

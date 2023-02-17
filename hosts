@@ -1,5 +1,5 @@
 [testpmd]
-192.168.0.176
+192.168.0.218
 
 [trafficgen]
 perf122.perf.lab.eng.bos.redhat.com

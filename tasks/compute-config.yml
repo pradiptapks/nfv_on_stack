@@ -23,3 +23,40 @@
             update: yes
           when: perf_git_script is defined
       when: fdp_debug == "true" and ovs_dpdk_debug == "true" and inventory_hostname in groups['osp-compute']
+
+    - block:
+        - name: Download OFED bunddles
+          ansible.builtin.unarchive:
+            src: https://content.mellanox.com/ofed/MLNX_OFED-{{ mlnx_ofed_version }}/MLNX_OFED_LINUX-{{ mlnx_ofed_version }}-rhel{{ rhel_release }}-x86_64.tgz
+            dest: /var/lib/
+            remote_src: yes
+          when: mlnx_ofed_version is defined and rhel_release is defined
+
+        - name: Create OFED repository
+          ansible.builtin.yum_repository:
+            name: mlx_ofed
+            file: mlx_ofed
+            description: Mellanox Ofed Repository
+            baseurl: file:////var/lib/MLNX_OFED_LINUX-{{ ofed_version }}-rhel{{ rhel_release }}-x86_64/RPMS
+            enabled: yes
+            gpgcheck: no
+          when: mlnx_ofed_repository == "true" and mlnx_ofed_version is defined and rhel_release is defined
+
+        - name: Install Mellanox Utiility rpms
+          loop: "{{ mlnx_package_list }}"
+          dnf:
+            name: "{{ item }}"
+            state: present
+
+        - name: Set SRIOV VFs on Mellanox Card
+          loop: "{{ mlnx_pci_list }}"
+          shell: |
+            mlxconfig -d {{ item }} -y set SRIOV_EN=1 NUM_OF_VFS={{ mlnx_vf_num }}
+          register: mlnxupdate
+          when: mlnx_sriov_vf == "true" and mlnx_vf_num is defined
+
+        - name: Reboot mlx_compute node post VF config
+          reboot:
+            pre_reboot_delay: 60
+          when: mlnxupdate.changed
+      when: mlnx_compute == "true" and inventory_hostname in groups['osp-compute']

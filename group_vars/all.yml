@@ -19,11 +19,19 @@ root_password: "100yard-"
 #  dpdk-testpmd OS Configuration #
 ##################################
 testpmd_kernel: "true"
-testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=8 iommu=pt intel_iommu=on isolcpus=3-5 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
-testpmd_isolated_cores: "3-5"
+testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=10 iommu=pt intel_iommu=on isolcpus=3-11 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
+testpmd_isolated_cores: "3-11"
 testpmd_tuned_profile: "cpu-partitioning"
-testpmd_custom_script: "true"
+testpmd_custom_script: "false"
 testpmd_script_location: "scripts/dpdk-testpmd.sh"
+testpmd_pci: "true"
+dpdk_driver_module_list:
+  - "vfio"
+  - "vfio-pci"
+testpmd_driver: "vfio-pci"
+testpmd_pci_list:
+  - "0000:00:03.0"
+  - "0000:00:04.0"
 
 ################################
 #  Trafficgen OS Configuration #
@@ -42,8 +50,8 @@ tgen_pci_list:
   - "0000:83:00.1"
   - "0000:08:00.0"
   - "0000:08:00.1"
-  - "0000:81:00.0"
-  - "0000:81:00.1"
+  - "0000:85:00.0"
+  - "0000:85:00.1"
 
 ##############################
 #  Additional Configuration  #
@@ -66,6 +74,7 @@ package_list:
   - "dpdk"
   - "numactl-devel"
   - "binutils"
+  - "driverctl"
   - "openvswitch2.15-debuginfo-2.15.0-130.el8fdp.x86_64"
   - "openvswitch2.15-debugsource-2.15.0-130.el8fdp.x86_64"
   - "openvswitch2.15-test-0:2.15.0-130.el8fdp.noarch"
@@ -92,6 +101,12 @@ ovs_dpdk_debug: "true"
 # For Perf samples analysis for PMD cores, this is sample script need to copied to Compute host.
 pmd_perf_script: "scripts/pmd_perf.sh"
 perf_git_script: "https://github.com/chaudron/perf_scripts"
+
+# Action against local port of ovs-dpdk provider bridge as the port always triggered syscall
+br_local_port_status: "down"
+provider_br_list:
+  - "br-provider1"
+  - "br-provider2"
 
 
 #######################

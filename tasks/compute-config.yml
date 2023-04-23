@@ -5,6 +5,15 @@
   any_errors_fatal: yes
   tasks:
     - block:
+        - name: Action against local port of ovs-dpdk provider bridges
+          loop: "{{ provider_br_list }}"
+          shell: |
+            ovs-ofctl mod-port {{ item }} {{ item }} {{ br_local_port_status }}
+            ovs-ofctl show {{ item }}
+          when: provider_br_list is defined and br_local_port_status is defined
+      when: inventory_hostname in groups['osp-compute']
+
+    - block:
         - name: Copied Perf Script
           copy:
             src: "{{ pmd_perf_script }}"

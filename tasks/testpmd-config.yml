@@ -1,9 +1,27 @@
 ---
-- hosts: testpmd
+- hosts: testpmd,osp-compute
   become: True
   gather_facts: True
   any_errors_fatal: yes
   tasks:
+    - block:
+        - name: Load modules in guest vm
+          loop: "{{ dpdk_driver_module_list }}"
+          shell: |
+            modprobe "{{ item }}"
+          when: dpdk_driver_module_list is defined
+
+        - name: Override Guest VM PCI driver to {{ testpmd_driver }}
+          loop: "{{ testpmd_pci_list }}"
+          shell: |
+            driverctl set-override "{{ item }}" {{ testpmd_driver }}
+          when: testpmd_pci == "true"
+
+        - name: List of override driver
+          shell: |
+            driverctl list-overrides
+      when: testpmd_pci == "true" and inventory_hostname in groups['testpmd']
+
     - block:
         - name: Copied custom dpdk-testpmd script to VM
           copy:
@@ -15,3 +33,13 @@
         - name: Execute dpdk-testpmd script
           command: sh /root/dpdk_testpmd.sh
       when: testpmd_custom_script == "true" and inventory_hostname in groups['testpmd']
+
+    - block:
+        - name: Copied custom dpdk-testpmd script to Compute
+          copy:
+            src: "{{ testpmd_script_location }}"
+            dest: /root/dpdk_testpmd.sh
+            owner: root
+            group: root
+            mode: 0755
+      when: testpmd_custom_script == "true" and inventory_hostname in groups['osp-compute']

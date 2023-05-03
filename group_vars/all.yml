@@ -6,6 +6,10 @@ osp_release: "16.2"
 rhel_release: "8.4"
 puddle: "RHOS-16.2-RHEL-8-20230209.n.1"
 
+install_cert: "true"
+cert_script: "scripts/custom_cert.sh"
+
+
 #####################
 #  Host Credentials #
 #####################
@@ -105,8 +109,9 @@ perf_git_script: "https://github.com/chaudron/perf_scripts"
 # Action against local port of ovs-dpdk provider bridge as the port always triggered syscall
 br_local_port_status: "down"
 provider_br_list:
-  - "br-provider1"
-  - "br-provider2"
+  - "br-dpdkbond1"
+#  - "br-provider1"
+#  - "br-provider2"
 
 
 #######################

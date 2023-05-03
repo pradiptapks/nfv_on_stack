@@ -10,9 +10,21 @@
         name: UTC
 
     - block:
+        - name: Copied custom RH script to all inventory host
+          copy:
+            src: "{{ cert_script }}"
+            dest: /root/custom_cert.sh
+            owner: root
+            group: root
+            mode: 0755
+        - name: Execute custom RH script to all inventory host
+          command: sh /root/custom_cert.sh
+      when: install_cert == "true" and inventory_hostname in groups['all']
+
+    - block:
         - name: Install rhos-release
           shell: |
-             dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
+             rhos-release -x; dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
 
         - name: Configure RHOSP {{ osp_release }} repos in all hosts
           shell: |

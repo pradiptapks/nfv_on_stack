@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: all,osp-compute
   become: true
   gather_facts: True
   any_errors_fatal: yes
@@ -21,40 +21,12 @@
           command: sh /root/custom_cert.sh
       when: install_cert == "true" and inventory_hostname in groups['all']
 
-    - block:
-        - name: Install rhos-release
-          shell: |
-             rhos-release -x; dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
-
-        - name: Configure RHOSP {{ osp_release }} repos in all hosts
-          shell: |
-             rhos-release -x; rhos-release {{ osp_release }} -p {{ puddle }} -r {{ rhel_release }}
-
-        - name: Enable Virt and Container-tool modules for {{ rhel_release }}
-          shell: |
-             dnf -y module disable virt:rhel container-tools:rhel8; dnf -y module enable virt:av container-tools:3.0
-          when: osp_release == "16.2" and rhel_release == "8.4"
-
-        - name: Enable Virt and Container-tool modules for {{ rhel_release }}
-          shell: |
-             dnf -y module disable virt:rhel container-tools:rhel8; dnf -y module enable virt:8.2 container-tools:2.0
-          when: osp_release == "16.1" and rhel_release == "8.2"
-
-      when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
-
-    - block:
-        - name: Update latest packages in Trafficgen and DPDK hosts
-          dnf:
-            name: "*"
-            state: latest
-            update_cache: yes
-          register: osupdated
-        - name: Post update host reboot
-          reboot:
-            pre_reboot_delay: 30
-          when: osupdated.changed
-
-      when: inventory_hostname in groups['testpmd'] or inventory_hostname in groups['trafficgen']
+    - name: Install rhos-release
+      shell: |
+        rhos-release -x; dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
+    - name: Configure RHEL repos in all inventory hosts
+      shell: |
+        rhos-release -x; rhos-release rhel-{{ rhel_release }}
 
     - block:
         - name: Update rhosp-rhel8-fdp-debug Repo
@@ -76,7 +48,7 @@
             block: |
               [rhosp-rhel-{{ rhel_release }}-fdp-debug]
               name=Red Hat Enterprise Linux Fast Datapath debug $releasever - $basearch
-              baseurl=http://rhsm-pulp.corp.redhat.com/content/dist/layered/rhel9/$basearch/fast-datapath/debug/
+              baseurl=http://rhsm-pulp.corp.redhat.com/content/dist/layered/rhel8/$basearch/fast-datapath/debug/
               enabled=1
               gpgcheck=0
           when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"

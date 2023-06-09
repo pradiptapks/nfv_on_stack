@@ -11,9 +11,13 @@
           register: testpmd_grub_update
           when: testpmd_kernel == "true" and testpmd_kernel_args is defined
 
+#        - name: Reboot TestPMD VMs
+#          reboot:
+#             pre_reboot_delay: 300
+#          when: testpmd_grub_update.changed
         - name: Reboot TestPMD VMs
-          reboot:
-             pre_reboot_delay: 60
+          ansible.builtin.reboot:
+            reboot_timeout: 600
           when: testpmd_grub_update.changed
       when: ansible_os_family == "RedHat" and inventory_hostname in groups['testpmd']
 

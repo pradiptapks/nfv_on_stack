@@ -43,3 +43,20 @@
             group: root
             mode: 0755
       when: testpmd_custom_script == "true" and inventory_hostname in groups['osp-compute']
+
+    - block:
+        - name: Download OFED bunddles in Guest VM
+          ansible.builtin.unarchive:
+            src: https://content.mellanox.com/ofed/MLNX_OFED-{{ guest_ofed_version }}/MLNX_OFED_LINUX-{{ guest_ofed_version }}-rhel{{ rhel_release }}-x86_64.tgz
+            dest: /var/lib/
+            remote_src: yes
+        - name: Create OFED repository
+          ansible.builtin.yum_repository:
+            name: mlx-ofed-{{ guest_ofed_version }}-rhel{{ rhel_release }}
+            file: mlx_ofed
+            description: Mellanox Ofed Repository
+            baseurl: file:////var/lib/MLNX_OFED_LINUX-{{ guest_ofed_version }}-rhel{{ rhel_release }}-x86_64/RPMS
+            enabled: yes
+            gpgcheck: no
+      when: guest_ofed == "true" and inventory_hostname in groups['testpmd']
+

@@ -50,6 +50,7 @@
             src: https://content.mellanox.com/ofed/MLNX_OFED-{{ guest_ofed_version }}/MLNX_OFED_LINUX-{{ guest_ofed_version }}-rhel{{ rhel_release }}-x86_64.tgz
             dest: /var/lib/
             remote_src: yes
+
         - name: Create OFED repository
           ansible.builtin.yum_repository:
             name: mlx-ofed-{{ guest_ofed_version }}-rhel{{ rhel_release }}
@@ -58,5 +59,58 @@
             baseurl: file:////var/lib/MLNX_OFED_LINUX-{{ guest_ofed_version }}-rhel{{ rhel_release }}-x86_64/RPMS
             enabled: yes
             gpgcheck: no
-      when: guest_ofed == "true" and inventory_hostname in groups['testpmd']
+
+        - name: Install Mellanox Utiility rpms
+          dnf:
+            name: mlnx-ofed-all
+            state: present
+            allowerasing: true
+
+        - name: Install Mellanox Utiility rpms
+          dnf:
+            name:
+              - meson
+              - python3-pyelftools
+              - python-pyelftools
+              - gcc
+              - glibc-devel
+              - kernel-headers
+              - kernel-devel
+              - numad
+              - numactl-libs
+              - numactl-devel
+              - libpcap
+              - wget
+            state: present
+
+        - name: Download DPDK-{{ dpdk_ver }}
+          get_url:
+            url: https://fast.dpdk.org/rel/dpdk-{{ dpdk_ver }}.tar.xz
+            dest: /opt/dpdk-{{ dpdk_ver }}.tar.xz
+
+        - name: Extract dpdk-{{ dpdk_ver }}.tar.xz
+          ansible.builtin.unarchive:
+            src: /opt/dpdk-{{ dpdk_ver }}.tar.xz
+            dest: /opt/
+            remote_src: yes
+
+        - name: Compile dpdk-{{ dpdk_ver }}
+          shell: |
+            meson build
+            ninja -C build
+          args:
+            chdir: /opt/dpdk-stable-{{ dpdk_ver }}/
+
+        - name: Create soft link for dpdk-testpmd
+          file:
+            src: /opt/dpdk-stable-{{ dpdk_ver }}/build/app/dpdk-testpmd
+            dest: /usr/bin/dpdk-testpmd
+            state: link
+
+        - name: Reboot Guest VMs
+          ansible.builtin.reboot:
+            reboot_timeout: 600
+
+      when: mlnx_ofed_guest_config == "true" and inventory_hostname in groups['testpmd']
+
 

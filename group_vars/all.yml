@@ -23,11 +23,14 @@ root_password: "100yard-"
 ##################################
 #  dpdk-testpmd OS Configuration #
 ##################################
-guest_ofed: "true"
+mlnx_ofed_guest_config: "true"
+dpdk_ver: "22.11.2"
 guest_ofed_version: "23.04-1.1.3.0"
+rhel_guest_repo: "http://download-node-02.eng.bos.redhat.com/rhel-9/rel-eng/RHEL-9/latest-RHEL-9.2/repofile.repo"
+# available repo servers: download.eng.tlv.redhat.com, download-node-02.eng.bos.redhat.com
+
 testpmd_kernel: "true"
 testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=6 iommu=pt intel_iommu=on isolcpus=3-11 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
-  #testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=6 iommu=pt intel_iommu=on isolcpus=3-11 ipv6.disable=1'"
 testpmd_isolated_cores: "3-11"
 testpmd_tuned_profile: "cpu-partitioning"
 testpmd_custom_script: "false"
@@ -62,27 +65,12 @@ tgen_pci_list:
   - "0000:85:00.1"
 
 ##############################
-#  Additional Configuration  #
+#  FDP Debugging for DUT     #
 ##############################
 # Enabled OVS debug repository and installed required RPMs for debugging.
 # RPMs get install in all investory host and can modified as per user choice.
 fdp_debug: "true"
 package_list:
-  - "strace"
-  - "wireshark-cli"
-  - "podman"
-  - "git"
-  - "wget"
-  - "vim"
-  - "tcpdump"
-  - "dpdk-tools"
-  - "tmux"
-  - "lsof"
-  - "tcl"
-  - "dpdk"
-  - "numactl-devel"
-  - "binutils"
-  - "driverctl"
   - "python3-pip"
 #  - "openvswitch3.1-debuginfo-3.1.0-23.el9fdp.x86_64"
 #  - "openvswitch3.1-debugsource-3.1.0-23.el9fdp.x86_64"

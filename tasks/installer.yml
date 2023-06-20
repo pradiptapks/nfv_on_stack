@@ -1,5 +1,5 @@
 ---
-- hosts: all,osp-compute
+- hosts: all
   become: true
   gather_facts: True
   any_errors_fatal: yes
@@ -21,12 +21,44 @@
           command: sh /root/custom_cert.sh
       when: install_cert == "true" and inventory_hostname in groups['all']
 
-    - name: Install rhos-release
-      shell: |
-        rhos-release -x; dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
-    - name: Configure RHEL repos in all inventory hosts
-      shell: |
-        rhos-release -x; rhos-release rhel-{{ rhel_release }}
+    - block:
+        - name: Install rhos-release
+          shell: |
+            rhos-release -x; dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
+
+        - name: Configure RHEL repos in all inventory hosts
+          shell: |
+            rhos-release -x; rhos-release rhel-{{ rhel_release }}
+
+      when: inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
+
+    - block:
+        - name: RHEL-{{ rhel_release }} Bundle Repository
+          shell: |
+            curl -o /etc/yum.repos.d/repofile.repo {{ rhel_guest_repo }}
+          when: ansible_os_family == "RedHat"
+      when: inventory_hostname in groups['testpmd']
+
+    - name: Common RPMs for all inventory hosts
+      dnf:
+        name:
+          - strace
+          - wireshark-cli
+          - podman
+          - git
+          - wget
+          - vim
+          - tcpdump
+          - dpdk-tools
+          - tmux
+          - lsof
+          - tcl
+          - dpdk
+          - numactl-devel
+          - binutils
+          - driverctl
+          - tar
+        state: present
 
     - block:
         - name: Update rhosp-rhel8-fdp-debug Repo
@@ -64,6 +96,5 @@
           pip:
             name: "{{ item }}"
             state: present
-          when: inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']
 
-      when: fdp_debug == "true"
+      when: fdp_debug == "true" and inventory_hostname in groups['trafficgen'] or inventory_hostname in groups['osp-compute']

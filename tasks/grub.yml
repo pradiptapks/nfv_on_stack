@@ -10,11 +10,7 @@
              grubby --remove-args={{ testpmd_kernel_args }} --args {{ testpmd_kernel_args }} --update-kernel DEFAULT ; grubby --info DEFAULT
           register: testpmd_grub_update
           when: testpmd_kernel == "true" and testpmd_kernel_args is defined
-
-#        - name: Reboot TestPMD VMs
-#          reboot:
-#             pre_reboot_delay: 300
-#          when: testpmd_grub_update.changed
+            
         - name: Reboot TestPMD VMs
           ansible.builtin.reboot:
             reboot_timeout: 600

@@ -6,12 +6,10 @@
 192.168.0.106 # VM-SRIOV-RHEL9-PERF162
 
 [trafficgen]
-perf122.perf.lab.eng.bos.redhat.com
+
 
 [osp-compute]
-perf202.perf.lab.eng.bos.redhat.com
-perf196.perf.lab.eng.bos.redhat.com
-perf162.perf.lab.eng.bos.redhat.com
+
 
 [testpmd:vars]
 ansible_ssh_user={{ testpmd_ssh_user }}

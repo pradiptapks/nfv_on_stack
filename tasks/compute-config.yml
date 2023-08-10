@@ -4,6 +4,13 @@
   gather_facts: True
   any_errors_fatal: yes
   tasks:
+    - name: Copied OVN RC file
+      copy:
+        src: scripts/ovnrc
+        dest: /root/
+        owner: root
+        group: root
+        mode: 0644
     - block:
         - name: Action against local port of ovs-dpdk provider bridges
           loop: "{{ provider_br_list }}"
@@ -17,7 +24,7 @@
         - name: Copied Perf Script
           copy:
             src: "{{ pmd_perf_script }}"
-            dest: /root/pmd_perf.sh
+            dest: /root/
             owner: root
             group: root
             mode: 0755

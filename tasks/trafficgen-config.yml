@@ -20,5 +20,81 @@
         - name: List of override driver
           shell: |
              driverctl list-overrides
-      when: inventory_hostname in groups['trafficgen']
+      when: tgen_pci == "true" and inventory_hostname in groups['trafficgen']
+
+
+    - block:
+        - name: RHEL-{{ rhel_release }} Bundle Repository
+          shell: |
+            curl -o /etc/yum.repos.d/repofile.repo {{ rhel_tgen_repo }}
+          when: ansible_os_family == "RedHat"
+
+        - name: Download OFED bunddles in Trfficgen 
+          ansible.builtin.unarchive:
+            src: https://content.mellanox.com/ofed/MLNX_OFED-{{ tgen_ofed_version }}/MLNX_OFED_LINUX-{{ tgen_ofed_version }}-rhel{{ rhel_release }}-x86_64.tgz
+            dest: /var/lib/
+            remote_src: yes
+
+        - name: Create OFED repository
+          ansible.builtin.yum_repository:
+            name: mlx-ofed-{{ tgen_ofed_version }}-rhel{{ rhel_release }}
+            file: mlx_ofed
+            description: Mellanox Ofed Repository
+            baseurl: file:////var/lib/MLNX_OFED_LINUX-{{ tgen_ofed_version }}-rhel{{ rhel_release }}-x86_64/RPMS
+            enabled: yes
+            gpgcheck: no
+
+        - name: Install Mellanox Utiility rpms
+          dnf:
+            name: mlnx-ofed-all
+            state: present
+            allowerasing: true
+
+        - name: Install Mellanox Utiility rpms
+          dnf:
+            name:
+              - meson
+              - python3-pyelftools
+              - python-pyelftools
+              - gcc
+              - glibc-devel
+              - kernel-headers
+              - kernel-devel
+              - numad
+              - numactl-libs
+              - numactl-devel
+              - libpcap
+              - wget
+            state: present
+
+        - name: Download DPDK-{{ tgen_dpdk_ver }}
+          get_url:
+            url: https://fast.dpdk.org/rel/dpdk-{{ tgen_dpdk_ver }}.tar.xz
+            dest: /opt/dpdk-{{ tgen_dpdk_ver }}.tar.xz
+
+        - name: Extract dpdk-{{ tgen_dpdk_ver }}.tar.xz
+          ansible.builtin.unarchive:
+            src: /opt/dpdk-{{ tgen_dpdk_ver }}.tar.xz
+            dest: /opt/
+            remote_src: yes
+
+        - name: Compile dpdk-{{ tgen_dpdk_ver }}
+          shell: |
+            meson build
+            ninja -C build
+          args:
+            chdir: /opt/dpdk-stable-{{ tgen_dpdk_ver }}/
+
+        - name: Create soft link for dpdk-testpmd
+          file:
+            src: /opt/dpdk-stable-{{ tgen_dpdk_ver }}/build/app/dpdk-testpmd
+            dest: /usr/bin/dpdk-testpmd
+            state: link
+
+        - name: Reboot Tgen
+          ansible.builtin.reboot:
+            reboot_timeout: 600
+
+      when: mlnx_ofed_tgen_config == "true" and inventory_hostname in groups['trafficgen']
+
 

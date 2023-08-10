@@ -1,0 +1,6 @@
+export SB=$(sudo ovs-vsctl get open . external_ids:ovn-remote | sed -e 's/\"//g')
+export NB=$(sudo ovs-vsctl get open . external_ids:ovn-remote | sed -e 's/\"//g' | sed -e 's/6642/6641/g')
+alias ovn-sbctl='sudo podman exec -it -u root ovn_controller ovn-sbctl --db=$SB'
+alias ovn-nbctl='sudo podman exec -it -u root ovn_controller ovn-nbctl --db=$NB'
+alias ovn-trace='sudo podman exec -it -u root ovn_controller ovn-trace --db=$SB'
+

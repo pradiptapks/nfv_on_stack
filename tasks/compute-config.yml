@@ -29,21 +29,11 @@
             group: root
             mode: 0755
           when: pmd_perf_script is defined
-
-        - name: Clone Git repository of Perf Script
-          git:
-            repo: "{{ perf_git_script }}"
-            dest: /root/perf_script
-            version: master
-            clone: yes
-            update: yes
-          when: perf_git_script is defined
       when: fdp_debug == "true" and ovs_dpdk_debug == "true" and inventory_hostname in groups['osp-compute']
 
     - block:
         - name: Download OFED bunddles
           ansible.builtin.unarchive:
-            #src: https://content.mellanox.com/ofed/MLNX_OFED-23.04-0.5.3.3/MLNX_OFED_LINUX-23.04-0.5.3.3-rhel9.1-x86_64.tgz
             src: https://content.mellanox.com/ofed/MLNX_OFED-{{ mlnx_ofed_version }}/MLNX_OFED_LINUX-{{ mlnx_ofed_version }}-rhel{{ rhel_release }}-x86_64.tgz
             dest: /var/lib/
             remote_src: yes
@@ -55,7 +45,6 @@
             file: mlx_ofed
             description: Mellanox Ofed Repository
             baseurl: file:////var/lib/MLNX_OFED_LINUX-{{ mlnx_ofed_version }}-rhel{{ rhel_release }}-x86_64/RPMS
-            #baseurl: file:////var/lib/MLNX_OFED_LINUX-23.04-0.5.3.3-rhel9.1-x86_64/RPMS
             enabled: yes
             gpgcheck: no
           when: mlnx_ofed_repository == "true" and mlnx_ofed_version is defined and rhel_release is defined

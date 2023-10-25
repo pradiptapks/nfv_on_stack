@@ -30,7 +30,7 @@
         - name: Updating initramfs/initrd image
           shell: |
              dracut -f
-      when: inventory_hostname in groups['testpmd']
+      when: ansible_os_family == "RedHat" and testpmd_kernel == "true" and inventory_hostname in groups['testpmd']
 
     - block:
         - name: Install Pre-requisite packages

@@ -23,19 +23,19 @@ root_password: "100yard-"
 ##################################
 #  dpdk-testpmd OS Configuration #
 ##################################
-mlnx_ofed_guest_config: "true"
+mlnx_ofed_guest_config: "false"
 dpdk_ver: "22.11.2"
 guest_ofed_version: "23.04-1.1.3.0"
 rhel_guest_repo: "http://download-node-02.eng.bos.redhat.com/rhel-9/rel-eng/RHEL-9/latest-RHEL-9.2/repofile.repo"
 # available repo servers: download.eng.tlv.redhat.com, download-node-02.eng.bos.redhat.com
 
 testpmd_kernel: "true"
-testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=6 iommu=pt intel_iommu=on isolcpus=3-11 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
-testpmd_isolated_cores: "3-11"
+testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=12 iommu=pt intel_iommu=on isolcpus=10-23 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
+testpmd_isolated_cores: "10-23"
 testpmd_tuned_profile: "cpu-partitioning"
 testpmd_custom_script: "false"
 testpmd_script_location: "scripts/dpdk-testpmd.sh"
-testpmd_pci: "false"
+testpmd_pci: "true"
 dpdk_driver_module_list:
   - "vfio"
   - "vfio-pci"
@@ -89,8 +89,8 @@ package_list:
   - "glibc-headers"
   - "kernel-devel"
   - "cscope"
-#  - "openvswitch3.1-debuginfo"
-#  - "openvswitch3.1-debugsource"
+  - "openvswitch3.1-debuginfo"
+  - "openvswitch3.1-debugsource"
 pip_binaries:
   - "text_histogram3"
 
@@ -98,19 +98,19 @@ pip_binaries:
 # OVS-DPDK Debug #
 ##################
 # Due to pre-requsites of debug rpms, ensure "fdp_debug" params should be true before enabled ovs_dpdk_debug flag.
-ovs_dpdk_debug: "false"
+ovs_dpdk_debug: "true"
 
 # For Perf samples analysis for PMD cores, this is sample script need to copied to Compute host.
 pmd_perf_script: "scripts/ovs/"
 perf_git_script: "https://github.com/chaudron/perf_scripts"
 
 # Action against local port of ovs-dpdk provider bridge as the port always triggered syscall
-#br_local_port_status: "down"
-#provider_br_list:
-#  - "br-intlprovider1"
-#  - "br-intlprovider2"
-#  - "br-mlxprovider1"
-#  - "br-mlxprovider2"
+br_local_port_status: "down"
+provider_br_list:
+  - "br-intlprovider1"
+  - "br-intlprovider2"
+  - "br-mlxprovider1"
+  - "br-mlxprovider2"
 #  - "br-intlbond"
 #  - "br-mlxbond"
 #  - "br-dpdkbond"
@@ -121,8 +121,8 @@ perf_git_script: "https://github.com/chaudron/perf_scripts"
 #######################
 # Mellanox Nic Config #
 #######################
-mlnx_compute: "true"
-mlnx_ofed_repository: "true"
+mlnx_compute: "false"
+mlnx_ofed_repository: "false"
 # Update the OFED version as per the avaliable details: https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
 mlnx_ofed_version: "23.04-1.1.3.0"
 mlnx_package_list:

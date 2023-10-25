@@ -15,7 +15,7 @@
           ansible.builtin.reboot:
             reboot_timeout: 600
           when: testpmd_grub_update.changed
-      when: ansible_os_family == "RedHat" and inventory_hostname in groups['testpmd']
+      when: ansible_os_family == "RedHat" and testpmd_kernel == "true" and inventory_hostname in groups['testpmd']
 
     - block:
         - name: Update Trafficgen Hosts Kernel boot parameter

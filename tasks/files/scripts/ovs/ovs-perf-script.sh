@@ -4,29 +4,25 @@
 # Hence to get an correct information the script need to execute locally on the host which has openvswitch with dpdk configuration.
 
 host=$(hostname | cut -d "." -f 1)
-dir="/tmp/$host-OvsPerfLog"
+dir="/var/lib/$host-OvsPerfLog"
 rm -rf $dir
 mkdir -p $dir
 
 file=$dir/cmd_output.log
 >file
 
-echofun() {
-  echo -e "\n\n$1" | tee -a $file
-}
-
-period="10";
+period="20";
 
 run_cmd() {
-  echofun "# $1 "
+  echo -e "# $1" | tee -a $file
   eval "$1" | tee -a $file
   if [[ $? -eq 0 ]]; then
-        echo -e "\n........ Perf captured task completed..." | tee -a $file
+        echo -e "........ Perf captured task completed..." | tee -a $file
   else
-        echo -e "\n........ Perf task failed" | tee -a $file
+        echo -e "........ Perf task failed" | tee -a $file
         exit 1;
   fi
-  sleep 5;
+  sleep 2;
 }
 
 flame_graph() {
@@ -56,7 +52,7 @@ perf_scripts() {
     	git clone $perfgitscript $perfscript &> /dev/null;
 
     	pushd $perfscript
-        	perf script -s $perfscript/analyze_perf_pmd_syscall.py -i $dir/ovs-syscall-pmd-perf.data /usr/sbin/ovs-vswitchd >& $dir/ovs-syscall-pmd-perf.log
+        	perf script -s $perfscript/analyze_perf_pmd_syscall.py -i $dir/ovs-syscall-pmd-perf.data /usr/sbin/ovs-vswitchd &> /dev/null >& $dir/ovs-syscall-pmd-perf.log
     	popd
 
 	echo -e "\nPerf Script Analysis Output: $dir/ovs-syscall-pmd-perf.log"
@@ -65,39 +61,32 @@ perf_scripts() {
 
 perf_collect() {
 
-    echo -e "\nSyscall Collection from OVS PMD Threads:" | tee -a $file
-    run_cmd "perf record -e syscalls:sys_enter_*  -e syscalls:sys_exit_* \
-        -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-syscall-pmd-perf.data \
-        -t `ps -To tid,comm \`pidof ovs-vswitchd\` | grep pmd | awk '{$1=$1};1' | cut -d \" \" -f 1 | xargs | sed -e 's/ /,/g'` \
-        -- sleep $period";
-
-    echo -e "\nPerf smaples Collection from OVS PMD Threads:" | tee -a $file
-    run_cmd "perf record -e syscalls:sys_enter_*  -e syscalls:sys_exit_* \
-        -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-pmd-perf.data \
-        -t `ps -To tid,comm \`pidof ovs-vswitchd\` | grep pmd | awk '{$1=$1};1' | cut -d \" \" -f 1 | xargs | sed -e 's/ /,/g'` \
-        -- sleep $period";
+	OVS_PMD_THREADS=$(ps -To tid,comm `pidof ovs-vswitchd` | grep pmd | awk '{$1=$1};1' | cut -d " " -f 1 | xargs | sed -e 's/ /,/g')
+	OVS_HANDLER_THREADS=$(ps -To tid,comm `pidof ovs-vswitchd` | grep handler | awk '{$1=$1};1' | cut -d " " -f 1 | xargs | sed -e 's/ /,/g')
+	OVS_REVALIDATOR_THREADS=$(ps -To tid,comm `pidof ovs-vswitchd` | grep revalidator | awk '{$1=$1};1' | cut -d " " -f 1 | xargs | sed -e 's/ /,/g')
+	OVS_VSWITCHD_THREADS=$(ps -To tid,comm `pidof ovs-vswitchd` | grep ovs-vswitchd | awk '{$1=$1};1' | cut -d " " -f 1 | xargs | sed -e 's/ /,/g')
 
 
-    echo -e "\nPerf Data Collection OVS Handler Threads:"| tee -a $file
-    run_cmd "perf record \
-        -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-handler-perf.data \
-        -t `ps -To tid,comm \`pidof ovs-vswitchd\` | grep handler | awk '{$1=$1};1' | cut -d " " -f 1 | xargs | sed -e 's/ /,/g'` \
-        -- sleep $period";
+    	run_cmd "perf record -e raw_syscalls:sys_enter  -e raw_syscalls:sys_exit -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-syscall-pmd-perf.data -t $OVS_PMD_THREADS -- sleep $period";
+    	run_cmd "perf record -p $OVS_PMD_THREADS -g -i -o $dir/ovs-pmd-perf.data -- sleep $period";
+    	run_cmd "perf record -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-handler-perf.data -t $OVS_HANDLER_THREADS -- sleep $period";
+    	run_cmd "perf record -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-revalidator-perf.data -t $OVS_REVALIDATOR_THREADS -- sleep $period";
+    	run_cmd "perf record -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-vswitchd-perf.data -t $OVS_VSWITCHD_THREADS -- sleep $period";
 
-    echo -e "\nPerf Data Collection OVS Revalidator Threads:"| tee -a $file
-    run_cmd "perf record \
-        -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-revalidator-perf.data \
-        -t `ps -To tid,comm \`pidof ovs-vswitchd\` | grep revalidator | awk '{$1=$1};1' | cut -d " " -f 1 | xargs | sed -e 's/ /,/g'` \
-        -- sleep $period";
+	echo -e "\nOVS PMD Threads Cycles and Instructions:" | tee -a $file
+	perf stat -p $OVS_PMD_THREADS -e cycles:u,instructions:u -g sleep $period >> $file 2>&1 
 
-    echo -e "\nPerf Data Collection OVS Master Threads:"| tee -a $file
-    run_cmd "perf record \
-        -s --call-graph dwarf --per-thread -g -i -o $dir/ovs-vswitchd-perf.data \
-        -t `ps -To tid,comm \`pidof ovs-vswitchd\` | grep ovs-vswitchd | awk '{$1=$1};1' | cut -d " " -f 1 | xargs | sed -e 's/ /,/g'` \
-        -- sleep $period";
+	echo -e "\nOVS Handler Threads Cycles and Instructions:" | tee -a $file
+	perf stat -p $OVS_HANDLER_THREADS -e cycles:u,instructions:u -g sleep $period >> $file 2>&1
 
-    perf_scripts;
-    flame_graph;
+	echo -e "\nOVS Revalidator Threads Cycles and Instructions:" | tee -a $file
+	perf stat -p $OVS_REVALIDATOR_THREADS -e cycles:u,instructions:u -g sleep $period >> $file 2>&1
+
+	echo -e "\nOVS vSwitchd Thread Cycles and Instructions:" | tee -a $file
+	perf stat -p $OVS_VSWITCHD_THREADS -e cycles:u,instructions:u -g sleep $period >> $file 2>&1
+
+    	perf_scripts;
+    	flame_graph;
 }
 
 perf_collect;

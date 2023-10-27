@@ -89,6 +89,7 @@ package_list:
   - "glibc-headers"
   - "kernel-devel"
   - "cscope"
+  - "perl-open"
   - "openvswitch3.1-debuginfo"
   - "openvswitch3.1-debugsource"
 pip_binaries:

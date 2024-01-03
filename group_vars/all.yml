@@ -30,8 +30,8 @@ rhel_guest_repo: "http://download-node-02.eng.bos.redhat.com/rhel-9/rel-eng/RHEL
 # available repo servers: download.eng.tlv.redhat.com, download-node-02.eng.bos.redhat.com
 
 testpmd_kernel: "true"
-testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=12 iommu=pt intel_iommu=on isolcpus=10-23 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
-testpmd_isolated_cores: "10-23"
+testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=12 iommu=pt intel_iommu=on isolcpus=4-23 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
+testpmd_isolated_cores: "4-23"
 testpmd_tuned_profile: "cpu-partitioning"
 testpmd_custom_script: "false"
 testpmd_script_location: "scripts/dpdk-testpmd.sh"
@@ -74,7 +74,7 @@ rhel_tgen_repo: "http://download-node-02.eng.bos.redhat.com/rhel-9/rel-eng/RHEL-
 ##############################
 # Enabled OVS debug repository and installed required RPMs for debugging.
 # RPMs get install in all investory host and can modified as per user choice.
-fdp_debug: "true"
+fdp_debug: "false"
 package_list:
   - "python3-pip"
   - "openvswitch3.1-test"
@@ -90,8 +90,8 @@ package_list:
   - "kernel-devel"
   - "cscope"
   - "perl-open"
-  - "openvswitch3.1-debuginfo"
-  - "openvswitch3.1-debugsource"
+    #  - "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch3.1/3.1.0/54.el9fdp/x86_64/openvswitch3.1-debuginfo-3.1.0-54.el9fdp.x86_64.rpm"
+    #  - "http://download-node-02.eng.bos.redhat.com/brewroot/packages/openvswitch3.1/3.1.0/54.el9fdp/x86_64/openvswitch3.1-debugsource-3.1.0-54.el9fdp.x86_64.rpm"
 pip_binaries:
   - "text_histogram3"
 
@@ -99,7 +99,7 @@ pip_binaries:
 # OVS-DPDK Debug #
 ##################
 # Due to pre-requsites of debug rpms, ensure "fdp_debug" params should be true before enabled ovs_dpdk_debug flag.
-ovs_dpdk_debug: "true"
+ovs_dpdk_debug: "false"
 
 # For Perf samples analysis for PMD cores, this is sample script need to copied to Compute host.
 pmd_perf_script: "scripts/ovs/"
@@ -107,10 +107,10 @@ pmd_perf_script: "scripts/ovs/"
 # Action against local port of ovs-dpdk provider bridge as the port always triggered syscall
 br_local_port_status: "down"
 provider_br_list:
-  - "br-intlprovider1"
-  - "br-intlprovider2"
-  - "br-mlxprovider1"
-  - "br-mlxprovider2"
+#  - "br-intl1"
+#  - "br-intl2"
+#  - "br-mlx1"
+#  - "br-mlx2"
 #  - "br-intlbond"
 #  - "br-mlxbond"
 #  - "br-dpdkbond"
@@ -121,13 +121,13 @@ provider_br_list:
 #######################
 # Mellanox Nic Config #
 #######################
-mlnx_compute: "false"
-mlnx_ofed_repository: "false"
+mlnx_compute: "true"
+mlnx_ofed_repository: "true"
 # Update the OFED version as per the avaliable details: https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
 mlnx_ofed_version: "23.04-1.1.3.0"
 mlnx_package_list:
   - "mft"
-mlnx_sriov_vf: "false"
+mlnx_sriov_vf: "true"
 mlnx_vf_num: "20"
 mlnx_pci_list:
   - "0000:98:00.0"

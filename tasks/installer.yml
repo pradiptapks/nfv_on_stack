@@ -24,6 +24,8 @@
     - block:
         - name: Install rhos-release
           shell: |
+            rm -rf /etc/yum.repos.d/epel*.repo
+            rm -rf /etc/yum.repos.d/RHEL9-*.repo
             rhos-release -x; dnf erase -y rhos-release; dnf install -y http://download.devel.redhat.com/rcm-guest/puddles/OpenStack/rhos-release/rhos-release-latest.noarch.rpm
 
         - name: Configure RHEL repos in all inventory hosts

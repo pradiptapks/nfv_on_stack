@@ -25,24 +25,24 @@ root_password: "100yard-"
 ##################################
 mlnx_ofed_guest_config: "false"
 dpdk_ver: "22.11.2"
-guest_ofed_version: "23.04-1.1.3.0"
+guest_ofed_version: "23.10-2.1.3.1"
 rhel_guest_repo: "http://download-node-02.eng.bos.redhat.com/rhel-9/rel-eng/RHEL-9/latest-RHEL-9.2/repofile.repo"
 # available repo servers: download.eng.tlv.redhat.com, download-node-02.eng.bos.redhat.com
 
 testpmd_kernel: "true"
-testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=12 iommu=pt intel_iommu=on isolcpus=4-23 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y'"
-testpmd_isolated_cores: "4-23"
+testpmd_kernel_args: "'default_hugepagesz=1GB hugepagesz=1G hugepages=20 iommu=pt intel_iommu=on isolcpus=10-25 ipv6.disable=1 vfio.enable_unsafe_noiommu_mode=Y nmi_watchdog=0 audit=0 mce=off processor.max_cstate=1 idle=poll intel_idle.max_cstate=0 tsc=reliable rcupdate.rcu_normal_after_boot=1 systemd.cpu_affinity=0,1,2,3,4,5,6,7,8,9 isolcpus=managed_irq,10-25 rcutree.kthread_prio=11 systemd.unified_cgroup_hierarchy=0 systemd.legacy_systemd_cgroup_controller=1'"
+testpmd_isolated_cores: "10-25"
 testpmd_tuned_profile: "cpu-partitioning"
 testpmd_custom_script: "false"
 testpmd_script_location: "scripts/dpdk-testpmd.sh"
-testpmd_pci: "true"
+testpmd_pci: "false"
 dpdk_driver_module_list:
   - "vfio"
   - "vfio-pci"
 testpmd_driver: "vfio-pci"
 testpmd_pci_list:
-  - "0000:04:00.0"
   - "0000:05:00.0"
+  - "0000:06:00.0"
 
 ################################
 #  Trafficgen OS Configuration #
@@ -55,14 +55,14 @@ tgen_tuned_profile: "cpu-partitioning"
 tgen_pci: "true"
 tgen_driver: "vfio-pci"
 tgen_pci_list:
-  - "0000:06:00.0"
-  - "0000:06:00.1"
-  - "0000:83:00.0"
-  - "0000:83:00.1"
-  - "0000:08:00.0"
-  - "0000:08:00.1"
-  - "0000:85:00.0"
-  - "0000:85:00.1"
+  - "0000:3b:00.0"
+  - "0000:3b:00.1"
+  - "0000:5e:00.0"
+  - "0000:5e:00.1"
+  - "0000:af:00.0"
+  - "0000:af:00.1"
+  - "0000:86:00.0"
+  - "0000:86:00.1"
 
 mlnx_ofed_tgen_config: "false"
 tgen_dpdk_ver: "22.11.2"
@@ -74,7 +74,7 @@ rhel_tgen_repo: "http://download-node-02.eng.bos.redhat.com/rhel-9/rel-eng/RHEL-
 ##############################
 # Enabled OVS debug repository and installed required RPMs for debugging.
 # RPMs get install in all investory host and can modified as per user choice.
-fdp_debug: "false"
+fdp_debug: "true"
 package_list:
   - "python3-pip"
   - "openvswitch3.1-test"
@@ -105,8 +105,8 @@ ovs_dpdk_debug: "false"
 pmd_perf_script: "scripts/ovs/"
 
 # Action against local port of ovs-dpdk provider bridge as the port always triggered syscall
-br_local_port_status: "down"
-provider_br_list:
+#br_local_port_status: "down"
+#provider_br_list:
 #  - "br-intl1"
 #  - "br-intl2"
 #  - "br-mlx1"
@@ -121,13 +121,13 @@ provider_br_list:
 #######################
 # Mellanox Nic Config #
 #######################
-mlnx_compute: "true"
-mlnx_ofed_repository: "true"
+mlnx_compute: "false"
+mlnx_ofed_repository: "false"
 # Update the OFED version as per the avaliable details: https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
 mlnx_ofed_version: "23.04-1.1.3.0"
 mlnx_package_list:
   - "mft"
-mlnx_sriov_vf: "true"
+mlnx_sriov_vf: "false"
 mlnx_vf_num: "20"
 mlnx_pci_list:
   - "0000:98:00.0"

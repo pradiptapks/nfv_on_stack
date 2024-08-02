@@ -1,12 +1,13 @@
 [testpmd]
-#192.168.0.100 # 
-#192.168.0.101 # 
-#192.168.0.102 # 
-#192.168.0.103 #
+#192.168.0.101
+192.168.0.58
 
 [trafficgen]
+#nfv-intel-5.perf.eng.bos2.dc.redhat.com
 
 [osp-compute]
+#nfv-intel-11.perf.eng.bos2.dc.redhat.com
+#nfv-intel-12.perf.eng.bos2.dc.redhat.com
 
 [testpmd:vars]
 ansible_ssh_user=root
